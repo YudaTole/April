@@ -1,5 +1,4 @@
 <!doctype html>
-
 <html lang="id">
 <head>
   <meta charset="utf-8" />
@@ -35,32 +34,33 @@
     .grid { display:grid; gap: 12px; }
     .grid.cols-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
     .grid.cols-3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
-    @media (max-width: 820px){ .grid.cols-2, .grid.cols-3 { grid-template-columns: 1fr; } }label { font-size: 12px; color: var(--muted); display:block; margin-bottom: 6px; }
-input, select, textarea { width:100%; padding: 12px 14px; background: #0b1225; border:1px solid rgba(255,255,255,.08); border-radius: 12px; color: var(--text); outline:none; transition: .2s; }
-textarea { min-height: 64px; resize: vertical; }
-input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 8px var(--ring); border-color: var(--accent); }
+    @media (max-width: 820px){ .grid.cols-2, .grid.cols-3 { grid-template-columns: 1fr; } }
 
-.row { display:flex; gap: 10px; align-items:center; }
-.row > * { flex:1; }
+    label { font-size: 12px; color: var(--muted); display:block; margin-bottom: 6px; }
+    input, select, textarea { width:100%; padding: 12px 14px; background: #0b1225; border:1px solid rgba(255,255,255,.08); border-radius: 12px; color: var(--text); outline:none; transition: .2s; }
+    textarea { min-height: 64px; resize: vertical; }
+    input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 8px var(--ring); border-color: var(--accent); }
 
-.btns { display:flex; gap:10px; flex-wrap:wrap; }
-button { cursor:pointer; border:0; border-radius: 12px; padding: 12px 16px; color:#0b1020; font-weight:600; }
-.btn-primary { background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
-.btn-secondary { background: #e5e7eb; }
-.btn-ghost { background: transparent; color: var(--text); border:1px dashed rgba(255,255,255,.25); }
+    .row { display:flex; gap: 10px; align-items:center; }
+    .row > * { flex:1; }
 
-.totals { display:grid; gap:10px; grid-template-columns: repeat(3, minmax(0,1fr)); }
-.totals .tile { background:#0b1225; border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:14px; }
-.totals h4 { margin:0 0 4px; font-size:12px; color:var(--muted); }
-.totals .num { font-size:20px; font-weight:800; letter-spacing:.2px; }
+    .btns { display:flex; gap:10px; flex-wrap:wrap; }
+    button { cursor:pointer; border:0; border-radius: 12px; padding: 12px 16px; color:#0b1020; font-weight:600; }
+    .btn-primary { background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+    .btn-secondary { background: #e5e7eb; }
+    .btn-ghost { background: transparent; color: var(--text); border:1px dashed rgba(255,255,255,.25); }
 
-.center { text-align:center; }
-.hide { display:none !important; }
-.sep { height:1px; background: rgba(255,255,255,.12); margin: 16px 0; }
-.small { font-size:12px; color:var(--muted); }
-.right { text-align:right; }
-.danger { color: var(--danger); }
+    .totals { display:grid; gap:10px; grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .totals .tile { background:#0b1225; border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:14px; }
+    .totals h4 { margin:0 0 4px; font-size:12px; color:var(--muted); }
+    .totals .num { font-size:20px; font-weight:800; letter-spacing:.2px; }
 
+    .center { text-align:center; }
+    .hide { display:none !important; }
+    .sep { height:1px; background: rgba(255,255,255,.12); margin: 16px 0; }
+    .small { font-size:12px; color:var(--muted); }
+    .right { text-align:right; }
+    .danger { color: var(--danger); }
   </style>
 </head>
 <body>
@@ -82,131 +82,157 @@ button { cursor:pointer; border:0; border-radius: 12px; padding: 12px 16px; colo
         <div class="badge">April Parfume</div>
         <div class="small center">Kalkulator & Kirim WhatsApp</div>
       </div>
-    </div><!-- LOGIN CARD -->
-<section id="loginCard" class="card" aria-label="Login">
-  <h2 class="center" style="margin:0 0 4px">Login</h2>
-  <p class="small center" style="margin:0 0 18px">Khusus pemakaian pribadi. Masukkan ID & Password.</p>
-  <div class="grid cols-2">
-    <div>
-      <label for="loginId">ID</label>
-      <input id="loginId" placeholder="contoh: April parfume" autocomplete="username" />
     </div>
-    <div>
-      <label for="loginPw">Password</label>
-      <input id="loginPw" type="password" placeholder="••••••••" autocomplete="current-password" />
-    </div>
+
+    <!-- LOGIN CARD -->
+    <section id="loginCard" class="card" aria-label="Login">
+      <h2 class="center" style="margin:0 0 4px">Login</h2>
+      <p class="small center" style="margin:0 0 18px">Khusus pemakaian pribadi. Masukkan ID & Password.</p>
+      <div class="grid cols-2">
+        <div>
+          <label for="loginId">ID</label>
+          <input id="loginId" placeholder="contoh: April parfume" autocomplete="username" />
+        </div>
+        <div>
+          <label for="loginPw">Password</label>
+          <input id="loginPw" type="password" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn-primary" id="btnLogin">Masuk</button>
+        <button class="btn-ghost" id="btnClearSession">Hapus Sesi</button>
+      </div>
+      <p id="loginMsg" class="small danger hide" style="margin-top:10px">ID atau Password salah.</p>
+      <p class="small" style="margin-top:10px">Tip: Setelah login, browser akan mengingat sesi sampai tab ditutup.</p>
+    </section>
+
+    <!-- APP CARD -->
+    <section id="appCard" class="card hide" aria-label="Kalkulator Parfum">
+      <div class="row" style="justify-content:space-between; align-items:baseline;">
+        <h2 style="margin:0">Kalkulator Parfum</h2>
+        <button class="btn-ghost" id="btnLogout">Keluar</button>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class=\"grid cols-3\">
+        <div>
+          <label for=\"namaBibit\">Nama Bibit<\/label>
+          <input id=\"namaBibit\" placeholder=\"Mis. Melati Keraton\" \/>
+        <\/div>
+        <div>
+          <label for=\"jenisBotol\">Jenis Botol<\/label>
+          <input id=\"jenisBotol\" placeholder=\"Mis. Kabel 15ml \/ Roll on\" \/>
+        <\/div>
+        <div>
+          <label for=\"kualitas\">Kualitas<\/label>
+          <select id=\"kualitas\">
+            <option value=\"Standar\">Standar<\/option>
+            <option value=\"Premium\">Premium<\/option>
+            <option value=\"Eksklusif\">Eksklusif<\/option>
+          <\/select>
+        <\/div>
+      <\/div>
+
+      <div class=\"grid cols-3\" style=\"margin-top:8px\">
+        <div>
+          <label for=\"ekspedisi\">Ekspedisi<\/label>
+          <select id=\"ekspedisi\">
+            <option value=\"Tanpa Botol (isi ml)\">Tanpa Botol (isi ml)<\/option>
+            <option value=\"JNE\">JNE<\/option>
+            <option value=\"J&T\">J&T<\/option>
+            <option value=\"SiCepat\">SiCepat<\/option>
+            <option value=\"POS\">POS<\/option>
+            <option value=\"GOJEK\">GOJEK<\/option>
+            <option value=\"GrabExpress\">GrabExpress<\/option>
+          <\/select>
+        <\/div>
+        <div>
+          <label for=\"isiBotol\">Isi Botol (ml)<\/label>
+          <input id=\"isiBotol\" type=\"number\" min=\"0\" step=\"1\" value=\"15\" \/>
+        <\/div>
+        <div>
+          <label for=\"komposisiDisplay\">Komposisi (rasio)<\/label>
+          <input id=\"komposisiDisplay\" type=\"text\" value=\"1:2\" disabled \/>
+        <\/div>
+      <\/div>
+
+      <div class="grid cols-3" style="margin-top:8px">
+        <div>
+          <label for="mlBibit">Bibit (ml)</label>
+          <input id="mlBibit" type="number" min="0" step="0.1" value="5" />
+        </div>
+        <div>
+          <label for="mlAlkohol">Alkohol (ml)</label>
+          <input id="mlAlkohol" type="number" min="0" step="0.1" value="10" />
+        </div>
+        <div>
+          <label for="qty">Qty (pcs)</label>
+          <input id="qty" type="number" min="1" step="1" value="1" />
+        </div>
+      </div>
+
+      <div class="grid cols-3" style="margin-top:8px">
+        <div>
+          <label for="hargaBibit">Harga Bibit / ml (Rp)</label>
+          <input id="hargaBibit" type="number" min="0" step="100" value="1500" />
+        </div>
+        <div>
+          <label for="hargaAlkohol">Harga Alkohol / ml (Rp)</label>
+          <input id="hargaAlkohol" type="number" min="0" step="50" value="150" />
+        </div>
+        <div>
+          <label for="hargaBotol">Harga Botol (Rp)</label>
+          <input id="hargaBotol" type="number" min="0" step="100" value="3000" />
+        </div>
+      </div>
+
+      <div class="grid cols-3" style="margin-top:8px">
+        <div>
+          <label for="diskon">Diskon (Rp)</label>
+          <input id="diskon" type="number" min="0" step="100" value="0" />
+        </div>
+        <div>
+          <label for="ongkir">Ongkir (Rp)</label>
+          <input id="ongkir" type="number" min="0" step="500" value="0" />
+        </div>
+        <div>
+          <label for="catatan">Catatan</label>
+          <input id="catatan" placeholder="Opsional" />
+        </div>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="totals">
+        <div class="tile">
+          <h4>Biaya per pcs</h4>
+          <div id="biayaPerPcs" class="num">Rp 0</div>
+        </div>
+        <div class="tile">
+          <h4>Subtotal (× Qty)</h4>
+          <div id="subtotal" class="num">Rp 0</div>
+        </div>
+        <div class="tile">
+          <h4>Grand Total</h4>
+          <div id="grandTotal" class="num">Rp 0</div>
+        </div>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="btns">
+        <button class="btn-primary" id="btnWA">Kirim via WhatsApp</button>
+        <button class="btn-secondary" id="btnReset">Reset Form</button>
+        <button class="btn-ghost" id="btnGantiWA">Ganti Nomor WA Tujuan</button>
+        <span class="small" id="waInfo"></span>
+      </div>
+
+      <p class="small" style="margin-top:12px">Semua input otomatis tersimpan di perangkat (localStorage). Tidak ada data yang dikirim ke server.</p>
+    </section>
   </div>
-  <div class="row" style="margin-top:12px">
-    <button class="btn-primary" id="btnLogin">Masuk</button>
-    <button class="btn-ghost" id="btnClearSession">Hapus Sesi</button>
-  </div>
-  <p id="loginMsg" class="small danger hide" style="margin-top:10px">ID atau Password salah.</p>
-  <p class="small" style="margin-top:10px">Tip: Setelah login, browser akan mengingat sesi sampai tab ditutup.</p>
-</section>
 
-<!-- APP CARD -->
-<section id="appCard" class="card hide" aria-label="Kalkulator Parfum">
-  <div class="row" style="justify-content:space-between; align-items:baseline;">
-    <h2 style="margin:0">Kalkulator Parfum</h2>
-    <button class="btn-ghost" id="btnLogout">Keluar</button>
-  </div>
-
-  <div class="sep"></div>
-
-  <div class="grid cols-3">
-    <div>
-      <label for="namaBibit">Nama Bibit</label>
-      <input id="namaBibit" placeholder="Mis. Melati Keraton" />
-    </div>
-    <div>
-      <label for="jenisBotol">Jenis Botol</label>
-      <input id="jenisBotol" placeholder="Mis. Kabel 15ml / Roll on" />
-    </div>
-    <div>
-      <label for="kualitas">Kualitas</label>
-      <select id="kualitas">
-        <option value="Standar">Standar</option>
-        <option value="Premium">Premium</option>
-        <option value="Eksklusif">Eksklusif</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="grid cols-3" style="margin-top:8px">
-    <div>
-      <label for="mlBibit">Bibit (ml)</label>
-      <input id="mlBibit" type="number" min="0" step="0.1" value="5" />
-    </div>
-    <div>
-      <label for="mlAlkohol">Alkohol (ml)</label>
-      <input id="mlAlkohol" type="number" min="0" step="0.1" value="10" />
-    </div>
-    <div>
-      <label for="qty">Qty (pcs)</label>
-      <input id="qty" type="number" min="1" step="1" value="1" />
-    </div>
-  </div>
-
-  <div class="grid cols-3" style="margin-top:8px">
-    <div>
-      <label for="hargaBibit">Harga Bibit / ml (Rp)</label>
-      <input id="hargaBibit" type="number" min="0" step="100" value="1500" />
-    </div>
-    <div>
-      <label for="hargaAlkohol">Harga Alkohol / ml (Rp)</label>
-      <input id="hargaAlkohol" type="number" min="0" step="50" value="150" />
-    </div>
-    <div>
-      <label for="hargaBotol">Harga Botol (Rp)</label>
-      <input id="hargaBotol" type="number" min="0" step="100" value="3000" />
-    </div>
-  </div>
-
-  <div class="grid cols-3" style="margin-top:8px">
-    <div>
-      <label for="diskon">Diskon (Rp)</label>
-      <input id="diskon" type="number" min="0" step="100" value="0" />
-    </div>
-    <div>
-      <label for="ongkir">Ongkir (Rp)</label>
-      <input id="ongkir" type="number" min="0" step="500" value="0" />
-    </div>
-    <div>
-      <label for="catatan">Catatan</label>
-      <input id="catatan" placeholder="Opsional" />
-    </div>
-  </div>
-
-  <div class="sep"></div>
-
-  <div class="totals">
-    <div class="tile">
-      <h4>Biaya per pcs</h4>
-      <div id="biayaPerPcs" class="num">Rp 0</div>
-    </div>
-    <div class="tile">
-      <h4>Subtotal (× Qty)</h4>
-      <div id="subtotal" class="num">Rp 0</div>
-    </div>
-    <div class="tile">
-      <h4>Grand Total</h4>
-      <div id="grandTotal" class="num">Rp 0</div>
-    </div>
-  </div>
-
-  <div class="sep"></div>
-
-  <div class="btns">
-    <button class="btn-primary" id="btnWA">Kirim via WhatsApp</button>
-    <button class="btn-secondary" id="btnReset">Reset Form</button>
-    <button class="btn-ghost" id="btnGantiWA">Ganti Nomor WA Tujuan</button>
-    <span class="small" id="waInfo"></span>
-  </div>
-
-  <p class="small" style="margin-top:12px">Semua input otomatis tersimpan di perangkat (localStorage). Tidak ada data yang dikirim ke server.</p>
-</section>
-
-  </div>  <script>
+  <script>
     /********************
      * KONFIGURASI LOGIN & WHATSAPP
      ********************/
@@ -239,25 +265,28 @@ button { cursor:pointer; border:0; border-radius: 12px; padding: 12px 16px; colo
     const loginMsg  = $("loginMsg");
 
     const inputs = {
-      namaBibit: $("namaBibit"),
-      jenisBotol: $("jenisBotol"),
-      kualitas: $("kualitas"),
-      mlBibit: $("mlBibit"),
-      mlAlkohol: $("mlAlkohol"),
-      qty: $("qty"),
-      hargaBibit: $("hargaBibit"),
-      hargaAlkohol: $("hargaAlkohol"),
-      hargaBotol: $("hargaBotol"),
-      diskon: $("diskon"),
-      ongkir: $("ongkir"),
-      catatan: $("catatan"),
+      namaBibit: $(\"namaBibit\"),
+      jenisBotol: $(\"jenisBotol\"),
+      kualitas: $(\"kualitas\"),
+      ekspedisi: $(\"ekspedisi\"),
+      isiBotol: $(\"isiBotol\"),
+      komposisiDisplay: $(\"komposisiDisplay\"),
+      mlBibit: $(\"mlBibit\"),
+      mlAlkohol: $(\"mlAlkohol\"),
+      qty: $(\"qty\"),
+      hargaBibit: $(\"hargaBibit\"),
+      hargaAlkohol: $(\"hargaAlkohol\"),
+      hargaBotol: $(\"hargaBotol\"),
+      diskon: $(\"diskon\"),
+      ongkir: $(\"ongkir\"),
+      catatan: $(\"catatan\"),
     };
 
     const out = {
-      biayaPerPcs: $("biayaPerPcs"),
-      subtotal: $("subtotal"),
-      grandTotal: $("grandTotal"),
-      waInfo: $("waInfo"),
+      biayaPerPcs: $(\"biayaPerPcs\"),
+      subtotal: $(\"subtotal\"),
+      grandTotal: $(\"grandTotal\"),
+      waInfo: $(\"waInfo\"),
     };
 
     /********************
@@ -298,6 +327,15 @@ button { cursor:pointer; border:0; border-radius: 12px; padding: 12px 16px; colo
       const diskon = getNum(inputs.diskon);
       const ongkir = getNum(inputs.ongkir);
 
+      // hitung rasio sederhana (contoh 5 dan 10 => 1:2)
+      const a = Math.max(mlBibit, 0.000001);
+      const b = Math.max(mlAlkohol, 0.000001);
+      const gcd = (x,y)=>{ while(y){ const t=x%y; x=y; y=t; } return x; };
+      const g = gcd(Math.round(a*100), Math.round(b*100));
+      const r1 = Math.round(a*100)/g;
+      const r2 = Math.round(b*100)/g;
+      inputs.komposisiDisplay.value = ${r1}:${r2};
+
       const biayaBahan = (mlBibit * hargaBibit) + (mlAlkohol * hargaAlkohol) + hargaBotol;
       const biayaPerPcs = Math.max(0, biayaBahan);
       const subtotal = biayaPerPcs * qty;
@@ -312,8 +350,42 @@ button { cursor:pointer; border:0; border-radius: 12px; padding: 12px 16px; colo
 
     function buildWAMessage(){
       const lines = [];
-      lines.push("🪻 Data Pemesanan Parfum 🪻\n");
+      lines.push("🪻 Data Pemesanan Parfum 🪻
+");
       lines.push(📅 Tanggal: ${toDateID(new Date())});
+      lines.push(`🌸 Nama Bibit: ${inputs.namaBibit.value || '-'} `);
+      lines.push(`🧴 Jenis Botol: ${inputs.jenisBotol.value || '-'} `);
+      lines.push(`✨ Kualitas: ${inputs.kualitas.value || '-'} `);
+      lines.push(`🚚 Ekspedisi: ${inputs.ekspedisi.value || '-'} `);
+      lines.push(📦 Isi Botol: ${getNum(inputs.isiBotol)} ml);
+      lines.push("
+⚗️ Komposisi:");
+      lines.push(`- Rasio: ${inputs.komposisiDisplay.value || '-'} `);
+      lines.push(- Bibit: ${getNum(inputs.mlBibit)} ml);
+      lines.push(- Alkohol: ${getNum(inputs.mlAlkohol)} ml);
+      lines.push("
+💵 Perhitungan:");
+      lines.push(- Harga bibit/ml: ${toRupiah(getNum(inputs.hargaBibit))});
+      lines.push(- Harga alkohol/ml: ${toRupiah(getNum(inputs.hargaAlkohol))});
+      lines.push(- Harga botol: ${toRupiah(getNum(inputs.hargaBotol))});
+      lines.push(- Qty: ${Math.max(1, Math.floor(getNum(inputs.qty)))});
+      if (getNum(inputs.diskon) > 0) lines.push(- Diskon: ${toRupiah(getNum(inputs.diskon))});
+      if (getNum(inputs.ongkir) > 0) lines.push(- Ongkir: ${toRupiah(getNum(inputs.ongkir))});
+      lines.push("
+💰 Total:");
+      lines.push(- Biaya per pcs: ${out.biayaPerPcs.textContent});
+      lines.push(- Subtotal: ${out.subtotal.textContent});
+      lines.push(- Grand total: *${out.grandTotal.textContent}*);
+      if ((inputs.catatan.value || '').trim()){
+        lines.push("
+📝 Catatan:");
+        lines.push(inputs.catatan.value.trim());
+      }
+      lines.push("
+Terima kasih 🙏");
+      return lines.join("
+");
+    }`);
       lines.push(`🌸 Nama Bibit: ${inputs.namaBibit.value || '-'} `);
       lines.push(`🧴 Jenis Botol: ${inputs.jenisBotol.value || '-'} `);
       lines.push(`✨ Kualitas: ${inputs.kualitas.value || '-'} `);
@@ -349,8 +421,8 @@ button { cursor:pointer; border:0; border-radius: 12px; padding: 12px 16px; colo
     function setWAInfo(){
       out.waInfo.textContent = WA tujuan: +${WA_NUMBER_62};
     }
-
-    /********************
+/
+********************
      * EVENT BINDINGS
      ********************/
     document.addEventListener('DOMContentLoaded', () => {
