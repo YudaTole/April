@@ -2,197 +2,136 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Toko Parfum</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f9;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #222;
-      color: #fff;
-      padding: 15px;
-      text-align: center;
-    }
-    .container {
-      padding: 20px;
-      max-width: 900px;
-      margin: auto;
-    }
-    .card {
-      background: #fff;
-      padding: 20px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
-    }
-    input, select, button {
-      padding: 8px;
-      margin: 5px 0;
-      width: 100%;
-    }
-    button {
-      cursor: pointer;
-      background: #222;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    table, th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-    }
-    th {
-      background: #333;
-      color: white;
-    }
+    body { font-family: Arial, sans-serif; background:#f7f7f7; padding:20px; }
+    h2 { margin-top:30px; }
+    form, table { background:#fff; padding:20px; border-radius:10px; }
+    select, input, button { padding:8px; margin:5px; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>🧴 Toko Parfum</h1>
-  </header>
-  
-  <div class="container">
-    <!-- Login -->
-    <div class="card" id="loginCard">
-      <h2>Login</h2>
-      <input type="text" id="username" placeholder="Masukkan Username">
-      <button onclick="login()">Login</button>
-    </div>
+  <h1>Toko Parfum</h1>
 
-    <!-- Dashboard -->
-    <div class="card" id="dashboard" style="display:none;">
-      <h2>Halo, <span id="userDisplay"></span> 👋</h2>
-      <button onclick="logout()">Logout</button>
-    </div>
+  <h2>Tambah Pesanan</h2>
+  <form id="orderForm">
+    <label>Nama Parfum: <input type="text" id="nama" required></label><br>
 
-    <!-- Form Penjualan -->
-    <div class="card" id="formPenjualan" style="display:none;">
-      <h2>Tambah Penjualan</h2>
-      <label>Bibit Parfum</label>
-      <select id="bibit">
-        <option value="Lavender">Lavender (Rp50.000)</option>
-        <option value="Musk">Musk (Rp70.000)</option>
-        <option value="Rose">Rose (Rp90.000)</option>
-      </select>
+    <label>Bibit: 
+      <select id="bibit"></select>
+    </label><br>
 
-      <label>Botol</label>
-      <select id="botol">
-        <option value="Kaca">Botol Kaca (Rp20.000)</option>
-        <option value="Plastik">Botol Plastik (Rp10.000)</option>
-      </select>
+    <label>Botol: 
+      <select id="botol"></select>
+    </label><br>
 
-      <label>Kualitas</label>
-      <select id="kualitas">
-        <option value="Premium">Premium (+Rp30.000)</option>
-        <option value="Standar">Standar (+Rp10.000)</option>
-      </select>
+    <label>Kualitas: 
+      <select id="kualitas"></select>
+    </label><br>
 
-      <label>Jumlah</label>
-      <input type="number" id="jumlah" value="1" min="1">
+    <label>Jumlah: <input type="number" id="jumlah" value="1" min="1"></label><br>
 
-      <button onclick="tambahPenjualan()">Tambah</button>
-    </div>
+    <p><b>Total Harga: Rp <span id="total">0</span></b></p>
 
-    <!-- Data Penjualan -->
-    <div class="card" id="dataPenjualan" style="display:none;">
-      <h2>📊 Data Penjualan</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Bibit</th>
-            <th>Botol</th>
-            <th>Kualitas</th>
-            <th>Jumlah</th>
-            <th>Total (Rp)</th>
-          </tr>
-        </thead>
-        <tbody id="tabelPenjualan"></tbody>
-      </table>
-      <h3>Total Semua: Rp<span id="totalSemua">0</span></h3>
-    </div>
-  </div>
+    <button type="submit">Tambah ke Daftar</button>
+  </form>
 
-  <script>
-    // --- LOGIN SISTEM ---
-    function login() {
-      const username = document.getElementById("username").value;
-      if(username) {
-        localStorage.setItem("user", username);
-        loadUser();
-      } else {
-        alert("Masukkan username dulu!");
-      }
-    }
+  <h2>Daftar Pesanan</h2>
+  <table border="1" cellpadding="8">
+    <thead>
+      <tr>
+        <th>Nama</th>
+        <th>Bibit</th>
+        <th>Botol</th>
+        <th>Kualitas</th>
+        <th>Jumlah</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody id="orderList"></tbody>
+  </table>
 
-    function logout() {
-      localStorage.removeItem("user");
-      location.reload();
-    }
+<script>
+const bibitData = [
+  {nama:"Rose", harga:20000},
+  {nama:"Jasmine", harga:25000},
+  {nama:"Vanilla", harga:30000},
+  {nama:"Lavender", harga:28000},
+  {nama:"Musk", harga:35000}
+];
 
-    function loadUser() {
-      const user = localStorage.getItem("user");
-      if(user) {
-        document.getElementById("loginCard").style.display = "none";
-        document.getElementById("dashboard").style.display = "block";
-        document.getElementById("formPenjualan").style.display = "block";
-        document.getElementById("dataPenjualan").style.display = "block";
-        document.getElementById("userDisplay").innerText = user;
-        loadPenjualan();
-      }
-    }
+const botolData = [
+  {nama:"Botol 30ml", harga:5000},
+  {nama:"Botol 50ml", harga:8000},
+  {nama:"Botol 100ml", harga:12000}
+];
 
-    // --- PENJUALAN SISTEM ---
-    let hargaBibit = { "Lavender": 50000, "Musk": 70000, "Rose": 90000 };
-    let hargaBotol = { "Kaca": 20000, "Plastik": 10000 };
-    let hargaKualitas = { "Premium": 30000, "Standar": 10000 };
+const kualitasData = [
+  {nama:"Standard", harga:0},
+  {nama:"Sedang", harga:5000},
+  {nama:"Premium", harga:10000}
+];
 
-    function tambahPenjualan() {
-      const bibit = document.getElementById("bibit").value;
-      const botol = document.getElementById("botol").value;
-      const kualitas = document.getElementById("kualitas").value;
-      const jumlah = parseInt(document.getElementById("jumlah").value);
+// isi dropdown
+function loadOptions() {
+  let bibitSelect = document.getElementById("bibit");
+  let botolSelect = document.getElementById("botol");
+  let kualitasSelect = document.getElementById("kualitas");
 
-      const total = (hargaBibit[bibit] + hargaBotol[botol] + hargaKualitas[kualitas]) * jumlah;
+  bibitData.forEach(b => {
+    bibitSelect.innerHTML += `<option value="${b.harga}">${b.nama} (Rp${b.harga})</option>`;
+  });
 
-      let data = JSON.parse(localStorage.getItem("penjualan")) || [];
-      data.push({bibit, botol, kualitas, jumlah, total});
-      localStorage.setItem("penjualan", JSON.stringify(data));
+  botolData.forEach(b => {
+    botolSelect.innerHTML += `<option value="${b.harga}">${b.nama} (Rp${b.harga})</option>`;
+  });
 
-      loadPenjualan();
-    }
+  kualitasData.forEach(k => {
+    kualitasSelect.innerHTML += `<option value="${k.harga}">${k.nama} (Rp${k.harga})</option>`;
+  });
+}
 
-    function loadPenjualan() {
-      let data = JSON.parse(localStorage.getItem("penjualan")) || [];
-      let tbody = document.getElementById("tabelPenjualan");
-      tbody.innerHTML = "";
-      let totalSemua = 0;
+function hitungTotal() {
+  let bibit = parseInt(document.getElementById("bibit").value);
+  let botol = parseInt(document.getElementById("botol").value);
+  let kualitas = parseInt(document.getElementById("kualitas").value);
+  let jumlah = parseInt(document.getElementById("jumlah").value);
 
-      data.forEach((item) => {
-        let row = `<tr>
-          <td>${item.bibit}</td>
-          <td>${item.botol}</td>
-          <td>${item.kualitas}</td>
-          <td>${item.jumlah}</td>
-          <td>${item.total.toLocaleString()}</td>
-        </tr>`;
-        tbody.innerHTML += row;
-        totalSemua += item.total;
-      });
+  let total = (bibit + botol + kualitas) * jumlah;
+  document.getElementById("total").textContent = total.toLocaleString();
+  return total;
+}
 
-      document.getElementById("totalSemua").innerText = totalSemua.toLocaleString();
-    }
+document.getElementById("orderForm").addEventListener("input", hitungTotal);
 
-    loadUser();
-  </script>
+document.getElementById("orderForm").addEventListener("submit", function(e){
+  e.preventDefault();
+
+  let nama = document.getElementById("nama").value;
+  let bibit = document.getElementById("bibit").selectedOptions[0].text;
+  let botol = document.getElementById("botol").selectedOptions[0].text;
+  let kualitas = document.getElementById("kualitas").selectedOptions[0].text;
+  let jumlah = document.getElementById("jumlah").value;
+  let total = hitungTotal();
+
+  document.getElementById("orderList").innerHTML += `
+    <tr>
+      <td>${nama}</td>
+      <td>${bibit}</td>
+      <td>${botol}</td>
+      <td>${kualitas}</td>
+      <td>${jumlah}</td>
+      <td>Rp ${total.toLocaleString()}</td>
+    </tr>
+  `;
+
+  document.getElementById("orderForm").reset();
+  document.getElementById("total").textContent = "0";
+});
+
+// load awal
+loadOptions();
+hitungTotal();
+</script>
 </body>
 </html>
