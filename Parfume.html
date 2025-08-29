@@ -33,6 +33,11 @@
       background: #d63031; margin-top: 10px;
     }
     .logout:hover { background: #ff7675; }
+    .hapusBtn {
+      background: #d63031; color: #fff; border: none; padding: 5px 10px;
+      border-radius: 5px; cursor: pointer;
+    }
+    .hapusBtn:hover { background: #ff7675; }
   </style>
 </head>
 <body>
@@ -74,6 +79,8 @@
           <th>Ukuran</th>
           <th>Kualitas</th>
           <th>Harga</th>
+          <th>Tanggal</th>
+          <th>Aksi</th>
         </tr>
       </thead>
       <tbody id="transaksiList"></tbody>
@@ -142,7 +149,7 @@
       }
     }
 
-    // Transaksi
+    // Tambah transaksi
     function tambahTransaksi(){
       let pembeli = document.getElementById("namaPembeli").value;
       let bibit = document.getElementById("namaBibit").value;
@@ -153,10 +160,17 @@
         return;
       }
       let harga = hargaTabel[ml][kualitas];
+
+      // Buat tanggal transaksi (Hari, Tanggal Bulan Tahun)
+      let now = new Date();
+      let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      let tanggal = now.toLocaleDateString('id-ID', options);
+
       let transaksi = JSON.parse(localStorage.getItem("transaksi")) || [];
-      transaksi.push({pembeli, bibit, ml, kualitas, harga});
+      transaksi.push({pembeli, bibit, ml, kualitas, harga, tanggal});
       localStorage.setItem("transaksi", JSON.stringify(transaksi));
       renderTransaksi();
+
       // reset input
       document.getElementById("namaPembeli").value = "";
       document.getElementById("namaBibit").value = "";
@@ -170,7 +184,7 @@
       let list = document.getElementById("transaksiList");
       list.innerHTML = "";
       let total = 0;
-      transaksi.forEach(t => {
+      transaksi.forEach((t, index) => {
         total += t.harga;
         list.innerHTML += `<tr>
           <td>${t.pembeli}</td>
@@ -178,9 +192,18 @@
           <td>${t.ml} ml</td>
           <td>${t.kualitas}</td>
           <td>Rp ${t.harga.toLocaleString()}</td>
+          <td>${t.tanggal}</td>
+          <td><button class="hapusBtn" onclick="hapusTransaksi(${index})">Hapus</button></td>
         </tr>`;
       });
       document.getElementById("totalPenjualan").innerText = "Rp " + total.toLocaleString();
+    }
+
+    function hapusTransaksi(index){
+      let transaksi = JSON.parse(localStorage.getItem("transaksi")) || [];
+      transaksi.splice(index, 1); // hapus data
+      localStorage.setItem("transaksi", JSON.stringify(transaksi));
+      renderTransaksi();
     }
   </script>
 </body>
