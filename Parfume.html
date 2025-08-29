@@ -2,205 +2,186 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Parfum Store</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Penjualan Parfum</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #111;
-      color: #fff;
-      margin: 0; padding: 0;
-    }
-    header {
-      text-align: center;
-      padding: 20px;
-      background: #222;
-      font-size: 24px;
-      font-weight: bold;
+      margin: 0; font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #2c3e50, #34495e); color: #fff;
     }
     .container {
-      max-width: 700px;
-      margin: 30px auto;
-      background: #1e1e1e;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+      max-width: 600px; margin: 50px auto; background: #1e272e;
+      padding: 20px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5);
     }
+    h2 { text-align: center; margin-bottom: 20px; }
     input, select, button {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border-radius: 8px;
-      border: none;
-      font-size: 16px;
+      width: 100%; padding: 10px; margin: 10px 0;
+      border: none; border-radius: 8px; font-size: 14px;
     }
-    input, select {
-      background: #2a2a2a;
-      color: #fff;
-    }
-    button {
-      background: #ff4081;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #e73370;
-    }
+    input, select { background: #2d3436; color: #fff; }
+    button { background: #0984e3; color: white; cursor: pointer; font-weight: bold; }
+    button:hover { background: #74b9ff; }
     .hidden { display: none; }
     table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
+      width: 100%; border-collapse: collapse; margin-top: 15px;
     }
     th, td {
-      border: 1px solid #444;
-      padding: 8px;
-      text-align: center;
+      border: 1px solid #555; padding: 8px; text-align: center;
     }
-    th {
-      background: #333;
+    th { background: #0984e3; }
+    .logout {
+      background: #d63031; margin-top: 10px;
     }
+    .logout:hover { background: #ff7675; }
   </style>
 </head>
 <body>
+  <div class="container" id="authPage">
+    <h2>Login / Register</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <button onclick="register()">Register</button>
+  </div>
 
-<header>🌸 Parfum Store 🌸</header>
+  <div class="container hidden" id="mainPage">
+    <h2>Penjualan Parfum</h2>
+    <input type="text" id="namaPembeli" placeholder="Nama Pembeli">
+    <input type="text" id="namaBibit" placeholder="Nama Bibit (contoh: Zara Man)">
+    <select id="mili">
+      <option value="">Pilih Ukuran Botol (ml)</option>
+      <option value="4">4 ml</option>
+      <option value="8">8 ml</option>
+      <option value="10">10 ml</option>
+    </select>
+    <select id="kualitas">
+      <option value="">Pilih Kualitas</option>
+      <option value="Murni">Murni</option>
+      <option value="Premium">Premium</option>
+      <option value="Sedang">Sedang</option>
+      <option value="Standar">Standar</option>
+    </select>
+    <input type="text" id="harga" placeholder="Harga otomatis" readonly>
+    <button onclick="tambahTransaksi()">Tambah Transaksi</button>
+    <button class="logout" onclick="logout()">Logout</button>
 
-<div class="container" id="loginPage">
-  <h2>Login</h2>
-  <input type="text" id="username" placeholder="Username">
-  <input type="password" id="password" placeholder="Password">
-  <button onclick="login()">Login</button>
-</div>
-
-<div class="container hidden" id="appPage">
-  <h2>Form Penjualan</h2>
-  <input type="text" id="buyer" placeholder="Nama Pembeli">
-  <input type="text" id="bibit" placeholder="Nama Bibit (contoh: Zara Man)">
-  
-  <label>Ukuran Botol (ml):</label>
-  <select id="mili" onchange="updatePrice()">
-    <option value="">--Pilih--</option>
-    <option value="4">4 ml</option>
-    <option value="8">8 ml</option>
-    <option value="10">10 ml</option>
-  </select>
-  
-  <label>Kualitas:</label>
-  <select id="quality" onchange="updatePrice()">
-    <option value="">--Pilih--</option>
-    <option value="Murni">Murni</option>
-    <option value="Premium">Premium</option>
-    <option value="Sedang">Sedang</option>
-    <option value="Standar">Standar</option>
-  </select>
-  
-  <h3 id="priceDisplay">Harga: Rp 0</h3>
-  
-  <button onclick="saveTransaction()">Simpan Transaksi</button>
-  
-  <h2>📊 Rekap Penjualan</h2>
-  <p id="totalSales">Total Penjualan: Rp 0</p>
-  <table>
-    <thead>
-      <tr>
-        <th>Pembeli</th>
-        <th>Bibit</th>
-        <th>Mili</th>
-        <th>Kualitas</th>
-        <th>Harga</th>
-      </tr>
-    </thead>
-    <tbody id="salesTable"></tbody>
-  </table>
-</div>
-
-<script>
-  // Harga tabel
-  const priceTable = {
-    "4": { "Murni": 10000, "Premium": 8500, "Sedang": 7500, "Standar": 4500 },
-    "8": { "Murni": 20000, "Premium": 16500, "Sedang": 13500, "Standar": 9500 },
-    "10": { "Murni": 25000, "Premium": 21000, "Sedang": 21000, "Standar": 12000 }
-  };
-
-  let currentPrice = 0;
-
-  // Login
-  function login() {
-    const user = document.getElementById("username").value;
-    const pass = document.getElementById("password").value;
-
-    if (user && pass) {
-      localStorage.setItem("userLogin", JSON.stringify({user, pass}));
-      document.getElementById("loginPage").classList.add("hidden");
-      document.getElementById("appPage").classList.remove("hidden");
-      loadTransactions();
-    } else {
-      alert("Isi username & password dulu!");
-    }
-  }
-
-  // Update harga otomatis
-  function updatePrice() {
-    const mili = document.getElementById("mili").value;
-    const quality = document.getElementById("quality").value;
-
-    if (mili && quality) {
-      currentPrice = priceTable[mili][quality];
-      document.getElementById("priceDisplay").innerText = "Harga: Rp " + currentPrice.toLocaleString();
-    }
-  }
-
-  // Simpan transaksi ke localStorage
-  function saveTransaction() {
-    const buyer = document.getElementById("buyer").value;
-    const bibit = document.getElementById("bibit").value;
-    const mili = document.getElementById("mili").value;
-    const quality = document.getElementById("quality").value;
-
-    if (!buyer || !bibit || !mili || !quality) {
-      alert("Lengkapi semua data!");
-      return;
-    }
-
-    const transaction = { buyer, bibit, mili, quality, price: currentPrice };
-
-    let sales = JSON.parse(localStorage.getItem("sales")) || [];
-    sales.push(transaction);
-    localStorage.setItem("sales", JSON.stringify(sales));
-
-    loadTransactions();
-
-    // Reset form
-    document.getElementById("buyer").value = "";
-    document.getElementById("bibit").value = "";
-    document.getElementById("mili").value = "";
-    document.getElementById("quality").value = "";
-    document.getElementById("priceDisplay").innerText = "Harga: Rp 0";
-  }
-
-  // Tampilkan transaksi
-  function loadTransactions() {
-    const sales = JSON.parse(localStorage.getItem("sales")) || [];
-    let total = 0;
-    let rows = "";
-
-    sales.forEach(s => {
-      total += s.price;
-      rows += `
+    <h3>Daftar Transaksi</h3>
+    <table>
+      <thead>
         <tr>
-          <td>${s.buyer}</td>
-          <td>${s.bibit}</td>
-          <td>${s.mili} ml</td>
-          <td>${s.quality}</td>
-          <td>Rp ${s.price.toLocaleString()}</td>
+          <th>Pembeli</th>
+          <th>Bibit</th>
+          <th>Ukuran</th>
+          <th>Kualitas</th>
+          <th>Harga</th>
         </tr>
-      `;
-    });
+      </thead>
+      <tbody id="transaksiList"></tbody>
+    </table>
 
-    document.getElementById("salesTable").innerHTML = rows;
-    document.getElementById("totalSales").innerText = "Total Penjualan: Rp " + total.toLocaleString();
-  }
-</script>
+    <h3>Total Penjualan: <span id="totalPenjualan">Rp 0</span></h3>
+  </div>
 
+  <script>
+    // Harga tabel (mili -> kualitas -> harga)
+    const hargaTabel = {
+      4: { Murni: 10000, Premium: 8500, Sedang: 7500, Standar: 4500 },
+      8: { Murni: 20000, Premium: 16500, Sedang: 13500, Standar: 9500 },
+      10: { Murni: 25000, Premium: 21000, Sedang: 21000, Standar: 12000 }
+    };
+
+    const authPage = document.getElementById("authPage");
+    const mainPage = document.getElementById("mainPage");
+
+    // Cek login
+    if(localStorage.getItem("loggedInUser")){
+      authPage.classList.add("hidden");
+      mainPage.classList.remove("hidden");
+      renderTransaksi();
+    }
+
+    function login(){
+      let user = document.getElementById("username").value;
+      let pass = document.getElementById("password").value;
+      let savedUser = localStorage.getItem("user_" + user);
+      if(savedUser && JSON.parse(savedUser).password === pass){
+        localStorage.setItem("loggedInUser", user);
+        authPage.classList.add("hidden");
+        mainPage.classList.remove("hidden");
+        renderTransaksi();
+      } else {
+        alert("Username / Password salah!");
+      }
+    }
+
+    function register(){
+      let user = document.getElementById("username").value;
+      let pass = document.getElementById("password").value;
+      if(localStorage.getItem("user_" + user)){
+        alert("Username sudah ada!");
+        return;
+      }
+      localStorage.setItem("user_" + user, JSON.stringify({username: user, password: pass}));
+      alert("Register berhasil, silakan login.");
+    }
+
+    function logout(){
+      localStorage.removeItem("loggedInUser");
+      location.reload();
+    }
+
+    // Kalkulasi harga otomatis
+    document.getElementById("mili").addEventListener("change", hitungHarga);
+    document.getElementById("kualitas").addEventListener("change", hitungHarga);
+
+    function hitungHarga(){
+      let ml = document.getElementById("mili").value;
+      let kualitas = document.getElementById("kualitas").value;
+      if(ml && kualitas){
+        document.getElementById("harga").value = "Rp " + hargaTabel[ml][kualitas].toLocaleString();
+      }
+    }
+
+    // Transaksi
+    function tambahTransaksi(){
+      let pembeli = document.getElementById("namaPembeli").value;
+      let bibit = document.getElementById("namaBibit").value;
+      let ml = document.getElementById("mili").value;
+      let kualitas = document.getElementById("kualitas").value;
+      if(!pembeli || !bibit || !ml || !kualitas){
+        alert("Lengkapi semua data!");
+        return;
+      }
+      let harga = hargaTabel[ml][kualitas];
+      let transaksi = JSON.parse(localStorage.getItem("transaksi")) || [];
+      transaksi.push({pembeli, bibit, ml, kualitas, harga});
+      localStorage.setItem("transaksi", JSON.stringify(transaksi));
+      renderTransaksi();
+      // reset input
+      document.getElementById("namaPembeli").value = "";
+      document.getElementById("namaBibit").value = "";
+      document.getElementById("mili").value = "";
+      document.getElementById("kualitas").value = "";
+      document.getElementById("harga").value = "";
+    }
+
+    function renderTransaksi(){
+      let transaksi = JSON.parse(localStorage.getItem("transaksi")) || [];
+      let list = document.getElementById("transaksiList");
+      list.innerHTML = "";
+      let total = 0;
+      transaksi.forEach(t => {
+        total += t.harga;
+        list.innerHTML += `<tr>
+          <td>${t.pembeli}</td>
+          <td>${t.bibit}</td>
+          <td>${t.ml} ml</td>
+          <td>${t.kualitas}</td>
+          <td>Rp ${t.harga.toLocaleString()}</td>
+        </tr>`;
+      });
+      document.getElementById("totalPenjualan").innerText = "Rp " + total.toLocaleString();
+    }
+  </script>
 </body>
 </html>
