@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -63,7 +63,12 @@
       <option value="Dior Sauvage">Dior Sauvage</option>
       <option value="Chanel Bleu">Chanel Bleu</option>
       <option value="Aigner Black">Aigner Black</option>
-      <option value="Baccarat Rouge">Baccarat Rouge</option>
+      <option value="Baccarat">Baccarat</option>
+      <option value="Rouge">Rouge</option>
+      <option value="Yuda">Yuda</option>
+      <option value="Tole">Tole</option>
+      <option value="Tolay">Tolay</option>
+      <option value="Tol Tol">Tol Tol</option>
     </select>
 
     <select id="mili">
@@ -71,6 +76,11 @@
       <option value="4">4 ml</option>
       <option value="8">8 ml</option>
       <option value="10">10 ml</option>
+      <option value="15">15 ml</option>
+      <option value="20">20 ml</option>
+      <option value="30">30 ml</option>
+      <option value="45">45 ml</option>
+      <option value="50">50 ml</option>
     </select>
     <select id="kualitas">
       <option value="">Pilih Kualitas</option>
@@ -114,9 +124,14 @@
 
   <script>
     const hargaTabel = {
-      4: { Murni: 10000, Premium: 8500, Sedang: 7500, Standar: 4500 },
+      4: { Murni: 10000, Premium: 8500, Sedang: 7000, Standar: 4500 },
       8: { Murni: 20000, Premium: 16500, Sedang: 13500, Standar: 9500 },
-      10: { Murni: 25000, Premium: 21000, Sedang: 21000, Standar: 12000 }
+      10: { Murni: 25000, Premium: 21000, Sedang: 16500, Standar: 12000 },
+      15: { Murni: 37500, Premium: 31500, Sedang: 25000, Standar: 17500 },
+      20: { Murni: 50000, Premium: 42000, Sedang: 33500, Standar: 23500 },
+      30: { Murni: 75000, Premium: 63000, Sedang: 50000, Standar: 35000 },
+      45: { Murni: 112000, Premium: 94500, Sedang: 75000, Standar: 52500 },
+      50: { Murni: 125000, Premium: 105000, Sedang: 83500, Standar: 58500 }
     };
 
     const authPage = document.getElementById("authPage");
