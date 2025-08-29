@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Penjualan April Parfum</title>
+  <title>Penjualan Parfum</title>
   <style>
     body {
       margin: 0; font-family: 'Poppins', sans-serif;
       background: linear-gradient(135deg, #2c3e50, #34495e); color: #fff;
     }
     .container {
-      max-width: 600px; margin: 50px auto; background: #1e272e;
+      max-width: 700px; margin: 20px auto; background: #1e272e;
       padding: 20px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5);
     }
     h2 { text-align: center; margin-bottom: 20px; }
@@ -22,8 +22,11 @@
     button { background: #0984e3; color: white; cursor: pointer; font-weight: bold; }
     button:hover { background: #74b9ff; }
     .hidden { display: none; }
+    .table-wrapper {
+      overflow-x: auto;
+    }
     table {
-      width: 100%; border-collapse: collapse; margin-top: 15px;
+      width: 100%; border-collapse: collapse; margin-top: 15px; min-width: 650px;
     }
     th, td {
       border: 1px solid #555; padding: 8px; text-align: center;
@@ -33,11 +36,15 @@
       background: #d63031; margin-top: 10px;
     }
     .logout:hover { background: #ff7675; }
-    .hapusBtn {
-      background: #d63031; color: #fff; border: none; padding: 5px 10px;
-      border-radius: 5px; cursor: pointer;
+    .hapusBtn, .editBtn {
+      padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer;
     }
+    .hapusBtn { background: #d63031; color: #fff; }
     .hapusBtn:hover { background: #ff7675; }
+    .editBtn { background: #00b894; color: #fff; margin-left: 5px; }
+    .editBtn:hover { background: #55efc4; }
+    .exportBtn { background: #6c5ce7; margin-top: 10px; }
+    .exportBtn:hover { background: #a29bfe; }
   </style>
 </head>
 <body>
@@ -50,7 +57,7 @@
   </div>
 
   <div class="container hidden" id="mainPage">
-    <h2>Penjualan April Parfum</h2>
+    <h2>Penjualan Parfum</h2>
     <input type="text" id="namaPembeli" placeholder="Nama Pembeli">
     <input type="text" id="namaBibit" placeholder="Nama Bibit (contoh: Zara Man)">
     <select id="mili">
@@ -69,28 +76,37 @@
     <input type="text" id="harga" placeholder="Harga otomatis" readonly>
     <button onclick="tambahTransaksi()">Tambah Transaksi</button>
     <button class="logout" onclick="logout()">Logout</button>
+    <button class="exportBtn" onclick="exportExcel()">Export ke Excel</button>
+    <button class="exportBtn" onclick="exportPDF()">Export ke PDF</button>
 
     <h3>Daftar Transaksi</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Pembeli</th>
-          <th>Bibit</th>
-          <th>Ukuran</th>
-          <th>Kualitas</th>
-          <th>Harga</th>
-          <th>Tanggal</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody id="transaksiList"></tbody>
-    </table>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Pembeli</th>
+            <th>Bibit</th>
+            <th>Ukuran</th>
+            <th>Kualitas</th>
+            <th>Harga</th>
+            <th>Tanggal</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="transaksiList"></tbody>
+      </table>
+    </div>
 
     <h3>Total Penjualan: <span id="totalPenjualan">Rp 0</span></h3>
   </div>
 
+  <!-- jsPDF + AutoTable -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+  <!-- SheetJS untuk Excel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
   <script>
-    // Harga tabel (mili -> kualitas -> harga)
     const hargaTabel = {
       4: { Murni: 10000, Premium: 8500, Sedang: 7500, Standar: 4500 },
       8: { Murni: 20000, Premium: 16500, Sedang: 13500, Standar: 9500 },
@@ -99,8 +115,8 @@
 
     const authPage = document.getElementById("authPage");
     const mainPage = document.getElementById("mainPage");
+    let editIndex = null;
 
-    // Cek login
     if(localStorage.getItem("loggedInUser")){
       authPage.classList.add("hidden");
       mainPage.classList.remove("hidden");
@@ -137,7 +153,6 @@
       location.reload();
     }
 
-    // Kalkulasi harga otomatis
     document.getElementById("mili").addEventListener("change", hitungHarga);
     document.getElementById("kualitas").addEventListener("change", hitungHarga);
 
@@ -149,7 +164,6 @@
       }
     }
 
-    // Tambah transaksi
     function tambahTransaksi(){
       let pembeli = document.getElementById("namaPembeli").value;
       let bibit = document.getElementById("namaBibit").value;
@@ -160,18 +174,22 @@
         return;
       }
       let harga = hargaTabel[ml][kualitas];
-
-      // Buat tanggal transaksi (Hari, Tanggal Bulan Tahun)
       let now = new Date();
       let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       let tanggal = now.toLocaleDateString('id-ID', options);
 
       let transaksi = JSON.parse(localStorage.getItem("transaksi")) || [];
-      transaksi.push({pembeli, bibit, ml, kualitas, harga, tanggal});
+
+      if(editIndex !== null){
+        transaksi[editIndex] = {pembeli, bibit, ml, kualitas, harga, tanggal};
+        editIndex = null;
+      } else {
+        transaksi.push({pembeli, bibit, ml, kualitas, harga, tanggal});
+      }
+
       localStorage.setItem("transaksi", JSON.stringify(transaksi));
       renderTransaksi();
 
-      // reset input
       document.getElementById("namaPembeli").value = "";
       document.getElementById("namaBibit").value = "";
       document.getElementById("mili").value = "";
@@ -193,7 +211,10 @@
           <td>${t.kualitas}</td>
           <td>Rp ${t.harga.toLocaleString()}</td>
           <td>${t.tanggal}</td>
-          <td><button class="hapusBtn" onclick="hapusTransaksi(${index})">Hapus</button></td>
+          <td>
+            <button class="hapusBtn" onclick="hapusTransaksi(${index})">Hapus</button>
+            <button class="editBtn" onclick="editTransaksi(${index})">Edit</button>
+          </td>
         </tr>`;
       });
       document.getElementById("totalPenjualan").innerText = "Rp " + total.toLocaleString();
@@ -201,9 +222,64 @@
 
     function hapusTransaksi(index){
       let transaksi = JSON.parse(localStorage.getItem("transaksi")) || [];
-      transaksi.splice(index, 1); // hapus data
+      transaksi.splice(index, 1);
       localStorage.setItem("transaksi", JSON.stringify(transaksi));
       renderTransaksi();
+    }
+
+    function editTransaksi(index){
+      let transaksi = JSON.parse(localStorage.getItem("transaksi")) || [];
+      let t = transaksi[index];
+      document.getElementById("namaPembeli").value = t.pembeli;
+      document.getElementById("namaBibit").value = t.bibit;
+      document.getElementById("mili").value = t.ml;
+      document.getElementById("kualitas").value = t.kualitas;
+      document.getElementById("harga").value = "Rp " + t.harga.toLocaleString();
+      editIndex = index;
+    }
+
+    // Export ke Excel (XLSX dengan SheetJS)
+    function exportExcel(){
+      let transaksi = JSON.parse(localStorage.getItem("transaksi")) || [];
+      let total = transaksi.reduce((sum, t) => sum + t.harga, 0);
+
+      let data = [["No", "Pembeli", "Bibit", "Ukuran", "Kualitas", "Harga", "Tanggal"]];
+      transaksi.forEach((t, i) => {
+        data.push([i+1, t.pembeli, t.bibit, t.ml + " ml", t.kualitas, t.harga, t.tanggal]);
+      });
+      data.push(["", "", "", "", "Total", total, ""]);
+
+      let ws = XLSX.utils.aoa_to_sheet(data);
+      let wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Transaksi");
+      XLSX.writeFile(wb, "transaksi.xlsx");
+    }
+
+    // Export ke PDF (dengan tabel + total)
+    function exportPDF(){
+      const { jsPDF } = window.jspdf;
+      let doc = new jsPDF();
+      doc.setFontSize(14);
+      doc.text("Laporan Penjualan Parfum", 14, 15);
+
+      let transaksi = JSON.parse(localStorage.getItem("transaksi")) || [];
+      let total = transaksi.reduce((sum, t) => sum + t.harga, 0);
+
+      let rows = transaksi.map((t, i) => [
+        i+1, t.pembeli, t.bibit, t.ml + " ml", t.kualitas, "Rp " + t.harga.toLocaleString(), t.tanggal
+      ]);
+
+      doc.autoTable({
+        head: [["No", "Pembeli", "Bibit", "Ukuran", "Kualitas", "Harga", "Tanggal"]],
+        body: rows,
+        startY: 25,
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [9,132,227] }
+      });
+
+      doc.text("Total Penjualan: Rp " + total.toLocaleString(), 14, doc.lastAutoTable.finalY + 10);
+
+      doc.save("transaksi.pdf");
     }
   </script>
 </body>
