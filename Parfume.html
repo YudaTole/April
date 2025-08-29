@@ -5,177 +5,183 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Penjualan Parfum</title>
   <style>
-    body { font-family: Arial, sans-serif; background:#f8f9fa; margin:0; padding:0; }
-    header { background:#6c5ce7; color:#fff; padding:15px; text-align:center; }
-    .container { max-width:900px; margin:20px auto; background:#fff; padding:20px; border-radius:12px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
-    h2 { color:#2d3436; }
-    input, select, button { padding:10px; margin:5px 0; border-radius:8px; border:1px solid #ccc; width:100%; }
-    button { background:#6c5ce7; color:#fff; border:none; cursor:pointer; }
-    button:hover { background:#4834d4; }
-    table { width:100%; border-collapse:collapse; margin-top:15px; }
-    th, td { border:1px solid #ddd; padding:8px; text-align:center; }
-    th { background:#6c5ce7; color:#fff; }
-    .logout { background:#d63031; margin-top:10px; }
+    body {
+      margin: 0; font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #2c3e50, #34495e); color: #fff;
+    }
+    .container {
+      max-width: 600px; margin: 50px auto; background: #1e272e;
+      padding: 20px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+    h2 { text-align: center; margin-bottom: 20px; }
+    input, select, button {
+      width: 100%; padding: 10px; margin: 10px 0;
+      border: none; border-radius: 8px; font-size: 14px;
+    }
+    input, select { background: #2d3436; color: #fff; }
+    button { background: #0984e3; color: white; cursor: pointer; font-weight: bold; }
+    button:hover { background: #74b9ff; }
+    .hidden { display: none; }
+    table {
+      width: 100%; border-collapse: collapse; margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #555; padding: 8px; text-align: center;
+    }
+    th { background: #0984e3; }
+    .logout {
+      background: #d63031; margin-top: 10px;
+    }
+    .logout:hover { background: #ff7675; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>💎 Sistem Penjualan Parfum</h1>
-  </header>
-  <div class="container">
-    <!-- Login -->
-    <div id="login-section">
-      <h2>Login</h2>
-      <input type="text" id="username" placeholder="Username">
-      <input type="password" id="password" placeholder="Password">
-      <button onclick="login()">Login</button>
-      <button onclick="register()">Register</button>
-    </div>
-
-    <!-- Dashboard -->
-    <div id="app-section" style="display:none;">
-      <h2>Tambah Transaksi</h2>
-      <input type="text" id="namaPembeli" placeholder="Nama Pembeli" required>
-      <input type="text" id="namaBibit" placeholder="Nama Bibit (contoh: Zara Man)" required>
-
-      <label>Pilih Mili:</label>
-      <select id="mili">
-        <option value="4">4 ml</option>
-        <option value="8">8 ml</option>
-        <option value="10">10 ml</option>
-        <option value="15">15 ml</option>
-        <option value="20">20 ml</option>
-      </select>
-
-      <label>Kualitas:</label>
-      <select id="kualitas">
-        <option value="Murni">Murni</option>
-        <option value="Premium">Premium</option>
-        <option value="Sedang">Sedang</option>
-        <option value="Standar">Standar</option>
-      </select>
-
-      <button onclick="tambahTransaksi()">Tambah Transaksi</button>
-      <button class="logout" onclick="logout()">Logout</button>
-
-      <h2>Daftar Transaksi</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>No</th>
-            <th>Nama Pembeli</th>
-            <th>Bibit</th>
-            <th>Mili</th>
-            <th>Kualitas</th>
-            <th>Harga</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="transaksiList"></tbody>
-      </table>
-
-      <h2>Total Penjualan: Rp <span id="totalPenjualan">0</span></h2>
-    </div>
+  <div class="container" id="authPage">
+    <h2>Login / Register</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <button onclick="register()">Register</button>
   </div>
 
-<script>
-  // 📌 Tabel harga per ml & kualitas
-  const hargaTabel = {
-    4:  { Murni:10000, Premium:8500,  Sedang:7500,  Standar:4500 },
-    8:  { Murni:20000, Premium:16500, Sedang:13500, Standar:9500 },
-    10: { Murni:25000, Premium:21000, Sedang:21000, Standar:12000 },
-    15: { Murni:35000, Premium:30000, Sedang:27000, Standar:18000 },
-    20: { Murni:45000, Premium:39000, Sedang:35000, Standar:24000 }
-  };
+  <div class="container hidden" id="mainPage">
+    <h2>Penjualan Parfum</h2>
+    <input type="text" id="namaPembeli" placeholder="Nama Pembeli">
+    <input type="text" id="namaBibit" placeholder="Nama Bibit (contoh: Zara Man)">
+    <select id="mili">
+      <option value="">Pilih Ukuran Botol (ml)</option>
+      <option value="4">4 ml</option>
+      <option value="8">8 ml</option>
+      <option value="10">10 ml</option>
+    </select>
+    <select id="kualitas">
+      <option value="">Pilih Kualitas</option>
+      <option value="Murni">Murni</option>
+      <option value="Premium">Premium</option>
+      <option value="Sedang">Sedang</option>
+      <option value="Standar">Standar</option>
+    </select>
+    <input type="text" id="harga" placeholder="Harga otomatis" readonly>
+    <button onclick="tambahTransaksi()">Tambah Transaksi</button>
+    <button class="logout" onclick="logout()">Logout</button>
 
-  let transaksi = JSON.parse(localStorage.getItem("transaksi")) || [];
-  let currentUser = localStorage.getItem("currentUser");
-
-  // 🔹 Login & Register
-  function login(){
-    let user = document.getElementById("username").value;
-    let pass = document.getElementById("password").value;
-    let users = JSON.parse(localStorage.getItem("users")) || {};
-
-    if(users[user] && users[user] === pass){
-      localStorage.setItem("currentUser", user);
-      location.reload();
-    } else {
-      alert("Username atau password salah!");
-    }
-  }
-
-  function register(){
-    let user = document.getElementById("username").value;
-    let pass = document.getElementById("password").value;
-    let users = JSON.parse(localStorage.getItem("users")) || {};
-
-    if(users[user]){
-      alert("Username sudah terdaftar!");
-    } else {
-      users[user] = pass;
-      localStorage.setItem("users", JSON.stringify(users));
-      alert("Registrasi berhasil, silakan login!");
-    }
-  }
-
-  function logout(){
-    localStorage.removeItem("currentUser");
-    location.reload();
-  }
-
-  // 🔹 Tambah transaksi
-  function tambahTransaksi(){
-    let namaPembeli = document.getElementById("namaPembeli").value;
-    let namaBibit = document.getElementById("namaBibit").value;
-    let mili = document.getElementById("mili").value;
-    let kualitas = document.getElementById("kualitas").value;
-
-    if(!namaPembeli || !namaBibit) return alert("Lengkapi data!");
-
-    let harga = hargaTabel[mili][kualitas];
-
-    transaksi.push({namaPembeli,namaBibit,mili,kualitas,harga});
-    localStorage.setItem("transaksi", JSON.stringify(transaksi));
-    renderTransaksi();
-  }
-
-  // 🔹 Render tabel transaksi
-  function renderTransaksi(){
-    let list = document.getElementById("transaksiList");
-    list.innerHTML = "";
-    let total = 0;
-
-    transaksi.forEach((t, i) => {
-      total += t.harga;
-      list.innerHTML += `
+    <h3>Daftar Transaksi</h3>
+    <table>
+      <thead>
         <tr>
-          <td>${i+1}</td>
-          <td>${t.namaPembeli}</td>
-          <td>${t.namaBibit}</td>
-          <td>${t.mili} ml</td>
+          <th>Pembeli</th>
+          <th>Bibit</th>
+          <th>Ukuran</th>
+          <th>Kualitas</th>
+          <th>Harga</th>
+        </tr>
+      </thead>
+      <tbody id="transaksiList"></tbody>
+    </table>
+
+    <h3>Total Penjualan: <span id="totalPenjualan">Rp 0</span></h3>
+  </div>
+
+  <script>
+    // Harga tabel (mili -> kualitas -> harga)
+    const hargaTabel = {
+      4: { Murni: 10000, Premium: 8500, Sedang: 7500, Standar: 4500 },
+      8: { Murni: 20000, Premium: 16500, Sedang: 13500, Standar: 9500 },
+      10: { Murni: 25000, Premium: 21000, Sedang: 21000, Standar: 12000 }
+    };
+
+    const authPage = document.getElementById("authPage");
+    const mainPage = document.getElementById("mainPage");
+
+    // Cek login
+    if(localStorage.getItem("loggedInUser")){
+      authPage.classList.add("hidden");
+      mainPage.classList.remove("hidden");
+      renderTransaksi();
+    }
+
+    function login(){
+      let user = document.getElementById("username").value;
+      let pass = document.getElementById("password").value;
+      let savedUser = localStorage.getItem("user_" + user);
+      if(savedUser && JSON.parse(savedUser).password === pass){
+        localStorage.setItem("loggedInUser", user);
+        authPage.classList.add("hidden");
+        mainPage.classList.remove("hidden");
+        renderTransaksi();
+      } else {
+        alert("Username / Password salah!");
+      }
+    }
+
+    function register(){
+      let user = document.getElementById("username").value;
+      let pass = document.getElementById("password").value;
+      if(localStorage.getItem("user_" + user)){
+        alert("Username sudah ada!");
+        return;
+      }
+      localStorage.setItem("user_" + user, JSON.stringify({username: user, password: pass}));
+      alert("Register berhasil, silakan login.");
+    }
+
+    function logout(){
+      localStorage.removeItem("loggedInUser");
+      location.reload();
+    }
+
+    // Kalkulasi harga otomatis
+    document.getElementById("mili").addEventListener("change", hitungHarga);
+    document.getElementById("kualitas").addEventListener("change", hitungHarga);
+
+    function hitungHarga(){
+      let ml = document.getElementById("mili").value;
+      let kualitas = document.getElementById("kualitas").value;
+      if(ml && kualitas){
+        document.getElementById("harga").value = "Rp " + hargaTabel[ml][kualitas].toLocaleString();
+      }
+    }
+
+    // Transaksi
+    function tambahTransaksi(){
+      let pembeli = document.getElementById("namaPembeli").value;
+      let bibit = document.getElementById("namaBibit").value;
+      let ml = document.getElementById("mili").value;
+      let kualitas = document.getElementById("kualitas").value;
+      if(!pembeli || !bibit || !ml || !kualitas){
+        alert("Lengkapi semua data!");
+        return;
+      }
+      let harga = hargaTabel[ml][kualitas];
+      let transaksi = JSON.parse(localStorage.getItem("transaksi")) || [];
+      transaksi.push({pembeli, bibit, ml, kualitas, harga});
+      localStorage.setItem("transaksi", JSON.stringify(transaksi));
+      renderTransaksi();
+      // reset input
+      document.getElementById("namaPembeli").value = "";
+      document.getElementById("namaBibit").value = "";
+      document.getElementById("mili").value = "";
+      document.getElementById("kualitas").value = "";
+      document.getElementById("harga").value = "";
+    }
+
+    function renderTransaksi(){
+      let transaksi = JSON.parse(localStorage.getItem("transaksi")) || [];
+      let list = document.getElementById("transaksiList");
+      list.innerHTML = "";
+      let total = 0;
+      transaksi.forEach(t => {
+        total += t.harga;
+        list.innerHTML += `<tr>
+          <td>${t.pembeli}</td>
+          <td>${t.bibit}</td>
+          <td>${t.ml} ml</td>
           <td>${t.kualitas}</td>
           <td>Rp ${t.harga.toLocaleString()}</td>
-          <td><button onclick="hapusTransaksi(${i})">Hapus</button></td>
         </tr>`;
-    });
-
-    document.getElementById("totalPenjualan").innerText = total.toLocaleString();
-  }
-
-  // 🔹 Hapus transaksi
-  function hapusTransaksi(index){
-    transaksi.splice(index,1);
-    localStorage.setItem("transaksi", JSON.stringify(transaksi));
-    renderTransaksi();
-  }
-
-  // 🔹 Cek login
-  if(currentUser){
-    document.getElementById("login-section").style.display = "none";
-    document.getElementById("app-section").style.display = "block";
-    renderTransaksi();
-  }
-</script>
+      });
+      document.getElementById("totalPenjualan").innerText = "Rp " + total.toLocaleString();
+    }
+  </script>
 </body>
 </html>
