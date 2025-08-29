@@ -1,9 +1,9 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Penjualan April Parfum</title>
+  <title>Penjualan Parfum</title>
   <style>
     body {
       margin: 0; font-family: 'Poppins', sans-serif;
@@ -41,9 +41,50 @@
     .editBtn:hover { background: #55efc4; }
     .exportBtn { background: #6c5ce7; margin-top: 10px; }
     .exportBtn:hover { background: #a29bfe; }
-  </style>
+
+    /* 🎨 Custom  Dark Theme */
+    .select2-container--default .select2-selection--single {
+      background-color: #2d3436;
+      border: none;
+      border-radius: 8px;
+      height: 42px;
+      color: #fff;
+    }
+    .select2-container--default .select2-selection__rendered {
+      color: #fff;
+      line-height: 42px;
+    }
+    .select2-container--default .select2-selection__arrow b {
+      border-color: #fff transparent transparent transparent !important;
+    }
+    .select2-dropdown {
+      background: #2d3436;
+      color: #fff;
+      border: 1px solid #555;
+    }
+    .select2-results__option {
+      padding: 2px;
+      color: #fff;
+    }
+    .select2-results__option--highlighted {
+      background-color: #0984e3 !important;
+      color: #fff !important;
+    }
+    /* 🆕 Input search di dropdown Select2 */
+.select2-container--default .select2-search--dropdown .select2-search__field {
+  background-color: #2d3436 !important;
+  color: #fff !important;
+  border: 1px solid #555 !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+}
+</style>
+
+  <!-- Select2 CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 </head>
 <body>
+  <!-- Halaman Login -->
   <div class="container" id="authPage">
     <h2>Login / Register</h2>
     <input type="text" id="username" placeholder="Username">
@@ -52,23 +93,20 @@
     <button onclick="register()">Register</button>
   </div>
 
+  <!-- Halaman Utama -->
   <div class="container hidden" id="mainPage">
-    <h2>Penjualan April Parfum</h2>
+    <h2>Penjualan Parfum</h2>
     <input type="text" id="namaPembeli" placeholder="Nama Pembeli">
 
-    <!-- Ganti dari input text ke dropdown -->
+    <!-- Dropdown Bibit dengan search -->
     <select id="namaBibit">
       <option value="">Pilih Bibit Parfum</option>
       <option value="Zara Man">Zara Man</option>
       <option value="Dior Sauvage">Dior Sauvage</option>
       <option value="Chanel Bleu">Chanel Bleu</option>
       <option value="Aigner Black">Aigner Black</option>
-      <option value="Baccarat">Baccarat</option>
-      <option value="Rouge">Rouge</option>
-      <option value="Yuda">Yuda</option>
-      <option value="Tole">Tole</option>
-      <option value="Tolay">Tolay</option>
-      <option value="Tol Tol">Tol Tol</option>
+      <option value="Baccarat Rouge">Baccarat Rouge</option>
+      <!-- Tambahkan sampai 95 bibit parfum di sini -->
     </select>
 
     <select id="mili">
@@ -76,11 +114,6 @@
       <option value="4">4 ml</option>
       <option value="8">8 ml</option>
       <option value="10">10 ml</option>
-      <option value="15">15 ml</option>
-      <option value="20">20 ml</option>
-      <option value="30">30 ml</option>
-      <option value="45">45 ml</option>
-      <option value="50">50 ml</option>
     </select>
     <select id="kualitas">
       <option value="">Pilih Kualitas</option>
@@ -116,22 +149,21 @@
     <h3>Total Penjualan: <span id="totalPenjualan">Rp 0</span></h3>
   </div>
 
+  <!-- jQuery + Select2 -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
   <!-- jsPDF + AutoTable -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
-  <!-- SheetJS untuk Excel -->
+  <!-- SheetJS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
   <script>
     const hargaTabel = {
-      4: { Murni: 10000, Premium: 8500, Sedang: 7000, Standar: 4500 },
+      4: { Murni: 10000, Premium: 8500, Sedang: 7500, Standar: 4500 },
       8: { Murni: 20000, Premium: 16500, Sedang: 13500, Standar: 9500 },
-      10: { Murni: 25000, Premium: 21000, Sedang: 16500, Standar: 12000 },
-      15: { Murni: 37500, Premium: 31500, Sedang: 25000, Standar: 17500 },
-      20: { Murni: 50000, Premium: 42000, Sedang: 33500, Standar: 23500 },
-      30: { Murni: 75000, Premium: 63000, Sedang: 50000, Standar: 35000 },
-      45: { Murni: 112000, Premium: 94500, Sedang: 75000, Standar: 52500 },
-      50: { Murni: 125000, Premium: 105000, Sedang: 83500, Standar: 58500 }
+      10: { Murni: 25000, Premium: 21000, Sedang: 21000, Standar: 12000 }
     };
 
     const authPage = document.getElementById("authPage");
@@ -212,7 +244,7 @@
       renderTransaksi();
 
       document.getElementById("namaPembeli").value = "";
-      document.getElementById("namaBibit").value = "";
+      $("#namaBibit").val("").trigger("change");
       document.getElementById("mili").value = "";
       document.getElementById("kualitas").value = "";
       document.getElementById("harga").value = "";
@@ -252,14 +284,14 @@
       let transaksi = JSON.parse(localStorage.getItem("transaksi")) || [];
       let t = transaksi[index];
       document.getElementById("namaPembeli").value = t.pembeli;
-      document.getElementById("namaBibit").value = t.bibit;
+      $("#namaBibit").val(t.bibit).trigger("change");
       document.getElementById("mili").value = t.ml;
       document.getElementById("kualitas").value = t.kualitas;
       document.getElementById("harga").value = "Rp " + t.harga.toLocaleString();
       editIndex = index;
     }
 
-    // Export Excel & PDF sama seperti versi sebelumnya...
+    // Export Excel (XLSX)
     function exportExcel(){
       let transaksi = JSON.parse(localStorage.getItem("transaksi")) || [];
       let total = transaksi.reduce((sum, t) => sum + t.harga, 0);
@@ -274,6 +306,7 @@
       XLSX.writeFile(wb, "transaksi.xlsx");
     }
 
+    // Export PDF
     function exportPDF(){
       const { jsPDF } = window.jspdf;
       let doc = new jsPDF();
@@ -294,6 +327,15 @@
       doc.text("Total Penjualan: Rp " + total.toLocaleString(), 14, doc.lastAutoTable.finalY + 10);
       doc.save("transaksi.pdf");
     }
+
+    // Aktifkan Select2
+    $(document).ready(function() {
+      $("#namaBibit").select2({
+        placeholder: "Cari atau pilih bibit parfum",
+        allowClear: true,
+        width: "100%"
+      });
+    });
   </script>
 </body>
 </html>
