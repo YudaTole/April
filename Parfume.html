@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Penjualan April Parfum</title>
+  <title>Penjualan Parfum</title>
   <style>
     body {
       margin: 0; font-family: 'Poppins', sans-serif;
@@ -22,9 +22,7 @@
     button { background: #0984e3; color: white; cursor: pointer; font-weight: bold; }
     button:hover { background: #74b9ff; }
     .hidden { display: none; }
-    .table-wrapper {
-      overflow-x: auto;
-    }
+    .table-wrapper { overflow-x: auto; }
     table {
       width: 100%; border-collapse: collapse; margin-top: 15px; min-width: 650px;
     }
@@ -32,9 +30,7 @@
       border: 1px solid #555; padding: 8px; text-align: center;
     }
     th { background: #0984e3; }
-    .logout {
-      background: #d63031; margin-top: 10px;
-    }
+    .logout { background: #d63031; margin-top: 10px; }
     .logout:hover { background: #ff7675; }
     .hapusBtn, .editBtn {
       padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer;
@@ -57,9 +53,19 @@
   </div>
 
   <div class="container hidden" id="mainPage">
-    <h2>Penjualan April Parfum</h2>
+    <h2>Penjualan Parfum</h2>
     <input type="text" id="namaPembeli" placeholder="Nama Pembeli">
-    <input type="text" id="namaBibit" placeholder="Nama Bibit (contoh: Zara Man)">
+
+    <!-- Ganti dari input text ke dropdown -->
+    <select id="namaBibit">
+      <option value="">Pilih Bibit Parfum</option>
+      <option value="Zara Man">Zara Man</option>
+      <option value="Dior Sauvage">Dior Sauvage</option>
+      <option value="Chanel Bleu">Chanel Bleu</option>
+      <option value="Aigner Black">Aigner Black</option>
+      <option value="Baccarat Rouge">Baccarat Rouge</option>
+    </select>
+
     <select id="mili">
       <option value="">Pilih Ukuran Botol (ml)</option>
       <option value="4">4 ml</option>
@@ -238,37 +244,31 @@
       editIndex = index;
     }
 
-    // Export ke Excel (XLSX dengan SheetJS)
+    // Export Excel & PDF sama seperti versi sebelumnya...
     function exportExcel(){
       let transaksi = JSON.parse(localStorage.getItem("transaksi")) || [];
       let total = transaksi.reduce((sum, t) => sum + t.harga, 0);
-
       let data = [["No", "Pembeli", "Bibit", "Ukuran", "Kualitas", "Harga", "Tanggal"]];
       transaksi.forEach((t, i) => {
         data.push([i+1, t.pembeli, t.bibit, t.ml + " ml", t.kualitas, t.harga, t.tanggal]);
       });
       data.push(["", "", "", "", "Total", total, ""]);
-
       let ws = XLSX.utils.aoa_to_sheet(data);
       let wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Transaksi");
       XLSX.writeFile(wb, "transaksi.xlsx");
     }
 
-    // Export ke PDF (dengan tabel + total)
     function exportPDF(){
       const { jsPDF } = window.jspdf;
       let doc = new jsPDF();
       doc.setFontSize(14);
       doc.text("Laporan Penjualan Parfum", 14, 15);
-
       let transaksi = JSON.parse(localStorage.getItem("transaksi")) || [];
       let total = transaksi.reduce((sum, t) => sum + t.harga, 0);
-
       let rows = transaksi.map((t, i) => [
         i+1, t.pembeli, t.bibit, t.ml + " ml", t.kualitas, "Rp " + t.harga.toLocaleString(), t.tanggal
       ]);
-
       doc.autoTable({
         head: [["No", "Pembeli", "Bibit", "Ukuran", "Kualitas", "Harga", "Tanggal"]],
         body: rows,
@@ -276,9 +276,7 @@
         styles: { fontSize: 10 },
         headStyles: { fillColor: [9,132,227] }
       });
-
       doc.text("Total Penjualan: Rp " + total.toLocaleString(), 14, doc.lastAutoTable.finalY + 10);
-
       doc.save("transaksi.pdf");
     }
   </script>
