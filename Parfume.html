@@ -1,631 +1,198 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
-
-// ===== Util Storage (LocalStorage) =====
-const LS_KEYS = {
-  AUTH: "parfume_auth_user",
-  DATA: "parfume_app_data_v1",
-};
-
-function loadData() {
-  try {
-    const raw = localStorage.getItem(LS_KEYS.DATA);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch (e) {
-    console.error("Load data error", e);
-    return null;
-  }
-}
-
-function saveData(data) {
-  try {
-    localStorage.setItem(LS_KEYS.DATA, JSON.stringify(data));
-  } catch (e) {
-    console.error("Save data error", e);
-  }
-}
-
-function money(n) {
-  if (isNaN(n)) return "Rp0";
-  return n.toLocaleString("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 });
-}
-
-function uid() {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
-}
-
-// ===== Default Seed Data =====
-const seed = {
-  bibit: [
-    { id: uid(), nama: "Baccarat Rouge 540", hargaPerMl: 25000 },
-    { id: uid(), nama: "Sakura Bloom", hargaPerMl: 12000 },
-    { id: uid(), nama: "Oud Royale", hargaPerMl: 30000 },
-  ],
-  botol: [
-    { id: uid(), nama: "Botol 10ml", kapasitasMl: 10, hargaBotol: 4000 },
-    { id: uid(), nama: "Botol 30ml", kapasitasMl: 30, hargaBotol: 7000 },
-    { id: uid(), nama: "Botol 50ml", kapasitasMl: 50, hargaBotol: 10000 },
-  ],
-  kualitas: [
-    { id: uid(), nama: "Regular (EDT)", multiplier: 1 },
-    { id: uid(), nama: "Premium (EDP)", multiplier: 1.25 },
-    { id: uid(), nama: "Exclusive (Extrait)", multiplier: 1.5 },
-  ],
-  orders: [],
-  settings: {
-    pajakPersen: 0,
-    diskonPersen: 0,
-    namaToko: "April Parfume",
-  },
-};
-
-// ===== App Root =====
-export default function ParfumePOS() {
-  const [auth, setAuth] = useState(() => localStorage.getItem(LS_KEYS.AUTH));
-  const [db, setDb] = useState(() => loadData() || seed);
-  const [tab, setTab] = useState("dashboard");
-
-  useEffect(() => saveData(db), [db]);
-
-  const totalPenjualan = useMemo(() => db.orders.reduce((a, b) => a + b.total, 0), [db.orders]);
-  const totalOrder = db.orders.length;
-  const totalProduk = db.bibit.length + db.botol.length + db.kualitas.length;
-
-  if (!auth) return <Login onLogin={(u)=>{ localStorage.setItem(LS_KEYS.AUTH, u); setAuth(u); }} />;
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100">
-      <Header auth={auth} db={db} setDb={setDb} onLogout={()=>{localStorage.removeItem(LS_KEYS.AUTH); setAuth(null);}} />
-
-      <nav className="sticky top-0 z-40 backdrop-blur bg-zinc-900/60 border-b border-zinc-800">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex gap-2 py-2 overflow-x-auto">
-            {[
-              { id: "dashboard", label: "Dashboard" },
-              { id: "kalkulator", label: "Kalkulator" },
-              { id: "orders", label: "Penjualan" },
-              { id: "produk", label: "Bibit • Botol • Kualitas" },
-              { id: "pengaturan", label: "Pengaturan" },
-            ].map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                className={`px-4 py-2 rounded-2xl text-sm border ${
-                  tab === t.id ? "bg-white text-black border-white" : "bg-zinc-800/70 border-zinc-700 hover:bg-zinc-700"
-                }`}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-6xl mx-auto px-4 py-6">
-        {tab === "dashboard" && (
-          <Dashboard totalPenjualan={totalPenjualan} totalOrder={totalOrder} totalProduk={totalProduk} db={db} />
-        )}
-        {tab === "kalkulator" && <Kalkulator db={db} setDb={setDb} />}
-        {tab === "orders" && <Orders db={db} setDb={setDb} />}
-        {tab === "produk" && <ProdukManager db={db} setDb={setDb} />}
-        {tab === "pengaturan" && <Pengaturan db={db} setDb={setDb} />}
-      </main>
-
-      <Footer />
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toko Parfum</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #222;
+      color: #fff;
+      padding: 15px;
+      text-align: center;
+    }
+    .container {
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+    .card {
+      background: #fff;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    input, select, button {
+      padding: 8px;
+      margin: 5px 0;
+      width: 100%;
+    }
+    button {
+      cursor: pointer;
+      background: #222;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    th {
+      background: #333;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🧴 Toko Parfum</h1>
+  </header>
+  
+  <div class="container">
+    <!-- Login -->
+    <div class="card" id="loginCard">
+      <h2>Login</h2>
+      <input type="text" id="username" placeholder="Masukkan Username">
+      <button onclick="login()">Login</button>
     </div>
-  );
-}
 
-// ===== Components =====
-function Header({ auth, db, setDb, onLogout }) {
-  return (
-    <header className="border-b border-zinc-800">
-      <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-        <motion.div initial={{opacity:0, y:-6}} animate={{opacity:1, y:0}} className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-fuchsia-500 to-indigo-500"/>
-          <div>
-            <div className="text-lg font-semibold">{db.settings?.namaToko || "Parfume Store"}</div>
-            <div className="text-xs text-zinc-400">POS • Manajemen Parfume</div>
-          </div>
-        </motion.div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={()=>{
-              const ok = confirm("Export semua data ke file JSON?");
-              if(!ok) return;
-              const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url; a.download = `parfume-data-${new Date().toISOString().slice(0,10)}.json`;
-              a.click(); URL.revokeObjectURL(url);
-            }}
-            className="px-3 py-2 text-sm rounded-xl border border-zinc-700 hover:bg-zinc-800"
-          >Export</button>
-          <label className="px-3 py-2 text-sm rounded-xl border border-zinc-700 hover:bg-zinc-800 cursor-pointer">
-            Import<input type="file" accept="application/json" className="hidden" onChange={(e)=>{
-              const file = e.target.files?.[0]; if(!file) return;
-              const reader = new FileReader();
-              reader.onload = () => {
-                try {
-                  const parsed = JSON.parse(reader.result);
-                  setDb(parsed); alert("Import berhasil!");
-                } catch (err) { alert("File tidak valid"); }
-              }; reader.readAsText(file);
-            }} />
-          </label>
-          <div className="text-sm px-3 py-2 rounded-xl bg-zinc-800 border border-zinc-700">👤 {auth}</div>
-          <button onClick={onLogout} className="px-3 py-2 text-sm rounded-xl border border-zinc-700 hover:bg-zinc-800">Logout</button>
-        </div>
-      </div>
-    </header>
-  );
-}
-
-function Dashboard({ totalPenjualan, totalOrder, totalProduk, db }) {
-  const card = "rounded-2xl border border-zinc-800 bg-zinc-900 p-5 shadow-sm";
-  const kpi = [
-    { label: "Total Penjualan", value: money(totalPenjualan) },
-    { label: "Jumlah Order", value: totalOrder },
-    { label: "Jumlah Produk", value: totalProduk },
-  ];
-  const top5 = [...db.orders].sort((a,b)=>b.total-a.total).slice(0,5);
-  return (
-    <div className="grid gap-6">
-      <div className="grid md:grid-cols-3 gap-4">
-        {kpi.map((x) => (
-          <motion.div key={x.label} initial={{opacity:0, y:8}} animate={{opacity:1, y:0}} className={card}>
-            <div className="text-zinc-400 text-sm">{x.label}</div>
-            <div className="text-2xl font-semibold mt-1">{x.value}</div>
-          </motion.div>
-        ))}
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-6">
-        <div className={card}>
-          <div className="font-medium mb-3">Order Terbaru</div>
-          <div className="space-y-3">
-            {db.orders.slice().reverse().slice(0,7).map((o)=> (
-              <div key={o.id} className="flex items-center justify-between text-sm">
-                <div className="truncate">
-                  <div className="font-medium">{o.customer || "Tanpa Nama"}</div>
-                  <div className="text-zinc-400 truncate max-w-[280px]">{o.items.map(i=>`${i.qty}x ${i.bibit} (${i.botol}/${i.kualitas})`).join(", ")}</div>
-                </div>
-                <div className="text-right">
-                  <div className="font-semibold">{money(o.total)}</div>
-                  <div className="text-xs text-zinc-500">{new Date(o.createdAt).toLocaleString("id-ID")}</div>
-                </div>
-              </div>
-            ))}
-            {db.orders.length===0 && <div className="text-zinc-500 text-sm">Belum ada order.</div>}
-          </div>
-        </div>
-        <div className={card}>
-          <div className="font-medium mb-3">Top Order (Nilai Tertinggi)</div>
-          <div className="space-y-3">
-            {top5.map((o,i)=> (
-              <div key={o.id} className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-lg bg-zinc-800 flex items-center justify-center text-xs">#{i+1}</div>
-                  <div>
-                    <div className="font-medium">{o.customer || "Tanpa Nama"}</div>
-                    <div className="text-zinc-400">{o.items.length} item • {new Date(o.createdAt).toLocaleDateString("id-ID")}</div>
-                  </div>
-                </div>
-                <div className="font-semibold">{money(o.total)}</div>
-              </div>
-            ))}
-            {top5.length===0 && <div className="text-zinc-500 text-sm">Belum ada data.</div>}
-          </div>
-        </div>
-      </div>
+    <!-- Dashboard -->
+    <div class="card" id="dashboard" style="display:none;">
+      <h2>Halo, <span id="userDisplay"></span> 👋</h2>
+      <button onclick="logout()">Logout</button>
     </div>
-  );
-}
 
-function Kalkulator({ db, setDb }) {
-  const [bibitId, setBibitId] = useState(db.bibit[0]?.id || "");
-  const [botolId, setBotolId] = useState(db.botol[0]?.id || "");
-  const [kualitasId, setKualitasId] = useState(db.kualitas[0]?.id || "");
-  const [isiMl, setIsiMl] = useState(db.botol[0]?.kapasitasMl || 10);
-  const [qty, setQty] = useState(1);
-  const [customer, setCustomer] = useState("");
-  const [catatan, setCatatan] = useState("");
-
-  const bibit = db.bibit.find(b=>b.id===bibitId);
-  const botol = db.botol.find(b=>b.id===botolId);
-  const kualitas = db.kualitas.find(k=>k.id===kualitasId);
-
-  useEffect(()=>{ if(botol) setIsiMl(botol.kapasitasMl); }, [botolId]);
-
-  const hargaDasar = (bibit?.hargaPerMl || 0) * (isiMl || 0) + (botol?.hargaBotol || 0);
-  const hargaSatuan = Math.round(hargaDasar * (kualitas?.multiplier || 1));
-  const subtotal = hargaSatuan * (qty || 0);
-  const pajak = Math.round(subtotal * (db.settings.pajakPersen/100));
-  const diskon = Math.round(subtotal * (db.settings.diskonPersen/100));
-  const total = subtotal + pajak - diskon;
-
-  function addToOrder() {
-    if (!bibit || !botol || !kualitas) return alert("Lengkapi pilihan");
-    if (isiMl > botol.kapasitasMl) return alert("Isi ML melebihi kapasitas botol");
-    const order = {
-      id: uid(),
-      createdAt: Date.now(),
-      customer,
-      catatan,
-      items: [
-        {
-          id: uid(),
-          bibit: bibit.nama,
-          botol: `${botol.nama} ${botol.kapasitasMl}ml`,
-          kualitas: kualitas.nama,
-          isiMl,
-          qty,
-          hargaSatuan,
-          subtotal,
-        },
-      ],
-      total,
-      pajak, diskon,
-    };
-    setDb({ ...db, orders: [...db.orders, order] });
-    alert("Order tersimpan!");
-  }
-
-  return (
-    <div className="grid lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
-        <div className="grid md:grid-cols-2 gap-4">
-          <Select label="Bibit" value={bibitId} onChange={setBibitId} options={db.bibit.map(b=>({value:b.id,label:`${b.nama} • ${money(b.hargaPerMl)}/ml`}))} />
-          <Select label="Botol" value={botolId} onChange={setBotolId} options={db.botol.map(b=>({value:b.id,label:`${b.nama} • ${b.kapasitasMl}ml • ${money(b.hargaBotol)}`}))} />
-          <Select label="Kualitas" value={kualitasId} onChange={setKualitasId} options={db.kualitas.map(k=>({value:k.id,label:`${k.nama} • x${k.multiplier}`}))} />
-          <Number label="Isi ML" value={isiMl} onChange={(v)=>setIsiMl(Number(v))} min={1} max={botol?.kapasitasMl || 999} />
-          <Number label="Qty" value={qty} onChange={(v)=>setQty(Number(v))} min={1} />
-          <Text label="Customer (opsional)" value={customer} onChange={setCustomer} placeholder="Nama pelanggan" />
-        </div>
-
-        <div className="mt-4">
-          <TextArea label="Catatan" value={catatan} onChange={setCatatan} placeholder="Catatan khusus…" />
-        </div>
-      </div>
-
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
-        <div className="font-medium mb-2">Ringkasan</div>
-        <div className="space-y-2 text-sm">
-          <Row l="Harga Dasar" r={money(hargaDasar)} />
-          <Row l="Multiplier Kualitas" r={`x${kualitas?.multiplier || 1}`} />
-          <Row l="Harga Satuan" r={money(hargaSatuan)} />
-          <Row l="Qty" r={`${qty} pcs`} />
-          <Row l="Subtotal" r={money(subtotal)} />
-          <Row l={`Pajak (${db.settings.pajakPersen}% )`} r={money(pajak)} />
-          <Row l={`Diskon (${db.settings.diskonPersen}% )`} r={money(diskon)} />
-          <div className="border-t border-zinc-800 my-2"></div>
-          <Row l={<span className="font-semibold">Total</span>} r={<span className="font-semibold">{money(total)}</span>} />
-        </div>
-        <button onClick={addToOrder} className="mt-4 w-full py-3 rounded-xl bg-white text-black font-medium hover:bg-zinc-200">Simpan Order</button>
-      </div>
-    </div>
-  );
-}
-
-function Orders({ db, setDb }) {
-  const [q, setQ] = useState("");
-  const filtered = db.orders.filter(o =>
-    (o.customer || "").toLowerCase().includes(q.toLowerCase()) ||
-    o.items.some(i => i.bibit.toLowerCase().includes(q.toLowerCase()))
-  );
-
-  function hapus(id){
-    if(!confirm("Hapus order ini?")) return;
-    setDb({...db, orders: db.orders.filter(o=>o.id!==id)});
-  }
-
-  const total = filtered.reduce((a,b)=>a+b.total,0);
-
-  return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
-      <div className="flex flex-col md:flex-row md:items-center gap-3 md:justify-between">
-        <div className="font-medium">Semua Penjualan</div>
-        <div className="flex gap-2 items-center">
-          <input value={q} onChange={(e)=>setQ(e.target.value)} placeholder="Cari nama / bibit" className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-xl text-sm outline-none"/>
-          <div className="text-sm">Total: <span className="font-semibold">{money(total)}</span></div>
-          <button onClick={()=>{
-            if(!confirm("Hapus SEMUA order?")) return;
-            setDb({...db, orders: []});
-          }} className="px-3 py-2 rounded-xl border border-red-600 text-red-400 hover:bg-red-900/20 text-sm">Hapus Semua</button>
-        </div>
-      </div>
-
-      <div className="mt-4 overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left text-zinc-400 border-b border-zinc-800">
-              <th className="py-2">Tanggal</th>
-              <th>Customer</th>
-              <th>Item</th>
-              <th className="text-right">Total</th>
-              <th className="text-right">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.slice().reverse().map(o=> (
-              <tr key={o.id} className="border-b border-zinc-800">
-                <td className="py-2 align-top">{new Date(o.createdAt).toLocaleString("id-ID")}</td>
-                <td className="align-top">{o.customer || "-"}</td>
-                <td className="align-top">
-                  <div className="space-y-1">
-                    {o.items.map(it=> (
-                      <div key={it.id} className="text-zinc-300">
-                        {it.qty}x {it.bibit} • {it.botol} • {it.kualitas} • {it.isiMl}ml — <span className="font-medium">{money(it.subtotal)}</span>
-                      </div>
-                    ))}
-                    {(o.pajak||o.diskon) ? (
-                      <div className="text-xs text-zinc-500">Pajak: {money(o.pajak)} • Diskon: {money(o.diskon)}</div>
-                    ) : null}
-                    {o.catatan && <div className="text-xs text-zinc-400">Catatan: {o.catatan}</div>}
-                  </div>
-                </td>
-                <td className="text-right align-top font-semibold">{money(o.total)}</td>
-                <td className="text-right align-top">
-                  <button onClick={()=>hapus(o.id)} className="px-3 py-1.5 rounded-lg border border-zinc-700 hover:bg-zinc-800">Hapus</button>
-                </td>
-              </tr>
-            ))}
-            {filtered.length===0 && (
-              <tr>
-                <td colSpan={5} className="text-center text-zinc-500 py-6">Belum ada data.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-function ProdukManager({ db, setDb }) {
-  return (
-    <div className="grid lg:grid-cols-3 gap-6">
-      <CrudCard
-        title="Bibit"
-        desc="Kelola daftar bibit & harga per ml."
-        columns={["Nama Bibit", "Harga / ml"]}
-        rows={db.bibit.map(b=>[b.nama, money(b.hargaPerMl)])}
-        onAdd={(values)=>{
-          const [nama, harga] = values; if(!nama) return alert("Nama wajib");
-          setDb({...db, bibit: [...db.bibit, { id: uid(), nama, hargaPerMl: Number(harga||0)}]});
-        }}
-        onEdit={(idx, values)=>{
-          const [nama, harga] = values;
-          const arr = [...db.bibit];
-          arr[idx] = { ...arr[idx], nama, hargaPerMl: Number(harga||0)};
-          setDb({...db, bibit: arr});
-        }}
-        onDelete={(idx)=>{
-          const arr = [...db.bibit]; arr.splice(idx,1); setDb({...db, bibit: arr});
-        }}
-        placeholders={["Ex: Vanilla Dream", "Ex: 15000"]}
-      />
-
-      <CrudCard
-        title="Botol"
-        desc="Kelola jenis botol, kapasitas & harga botol."
-        columns={["Nama Botol", "Kapasitas (ml)", "Harga Botol"]}
-        rows={db.botol.map(b=>[b.nama, `${b.kapasitasMl}`, money(b.hargaBotol)])}
-        onAdd={(values)=>{
-          const [nama, kap, harga] = values; if(!nama) return alert("Nama wajib");
-          setDb({...db, botol: [...db.botol, { id: uid(), nama, kapasitasMl: Number(kap||0), hargaBotol: Number(harga||0)}]});
-        }}
-        onEdit={(idx, values)=>{
-          const [nama, kap, harga] = values;
-          const arr = [...db.botol];
-          arr[idx] = { ...arr[idx], nama, kapasitasMl: Number(kap||0), hargaBotol: Number(harga||0)};
-          setDb({...db, botol: arr});
-        }}
-        onDelete={(idx)=>{
-          const arr = [...db.botol]; arr.splice(idx,1); setDb({...db, botol: arr});
-        }}
-        placeholders={["Ex: Botol Frosted 30ml", "30", "7000"]}
-      />
-
-      <CrudCard
-        title="Kualitas"
-        desc="Kelola level kualitas & multiplier."
-        columns={["Nama Kualitas", "Multiplier (x)"]}
-        rows={db.kualitas.map(k=>[k.nama, `x${k.multiplier}`])}
-        onAdd={(values)=>{
-          const [nama, multi] = values; if(!nama) return alert("Nama wajib");
-          setDb({...db, kualitas: [...db.kualitas, { id: uid(), nama, multiplier: Number(multi||1)}]});
-        }}
-        onEdit={(idx, values)=>{
-          const [nama, multi] = values;
-          const arr = [...db.kualitas];
-          arr[idx] = { ...arr[idx], nama, multiplier: Number(multi||1)};
-          setDb({...db, kualitas: arr});
-        }}
-        onDelete={(idx)=>{
-          const arr = [...db.kualitas]; arr.splice(idx,1); setDb({...db, kualitas: arr});
-        }}
-        placeholders={["Ex: Premium (EDP)", "1.25"]}
-      />
-    </div>
-  );
-}
-
-function CrudCard({ title, desc, columns, rows, onAdd, onEdit, onDelete, placeholders }) {
-  const [editing, setEditing] = useState(null); // { idx, values }
-  const [adding, setAdding] = useState(Array(columns.length).fill(""));
-
-  return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
-      <div className="mb-3">
-        <div className="font-medium">{title}</div>
-        <div className="text-sm text-zinc-400">{desc}</div>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left text-zinc-400 border-b border-zinc-800">
-              {columns.map((c)=> <th key={c} className="py-2">{c}</th>)}
-              <th className="text-right">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r, idx)=> (
-              <tr key={idx} className="border-b border-zinc-800">
-                {editing?.idx===idx ? (
-                  columns.map((c,i)=> (
-                    <td key={i} className="py-2">
-                      <input value={editing.values[i]} onChange={(e)=>setEditing({...editing, values: editing.values.map((v,vi)=> vi===i? e.target.value : v)})} className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-xl w-full outline-none"/>
-                    </td>
-                  ))
-                ) : (
-                  r.map((cell,i)=> <td key={i} className="py-2">{cell}</td>)
-                )}
-                <td className="py-2 text-right">
-                  {editing?.idx===idx ? (
-                    <div className="flex gap-2 justify-end">
-                      <button onClick={()=>{ onEdit(idx, editing.values); setEditing(null); }} className="px-3 py-1.5 rounded-lg border border-emerald-600 text-emerald-400 hover:bg-emerald-900/20">Simpan</button>
-                      <button onClick={()=>setEditing(null)} className="px-3 py-1.5 rounded-lg border border-zinc-700 hover:bg-zinc-800">Batal</button>
-                    </div>
-                  ) : (
-                    <div className="flex gap-2 justify-end">
-                      <button onClick={()=>setEditing({ idx, values: rows[idx].map(String) })} className="px-3 py-1.5 rounded-lg border border-zinc-700 hover:bg-zinc-800">Edit</button>
-                      <button onClick={()=>onDelete(idx)} className="px-3 py-1.5 rounded-lg border border-red-600 text-red-400 hover:bg-red-900/20">Hapus</button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {/* Add New */}
-            <tr>
-              {columns.map((c,i)=> (
-                <td key={i} className="py-2">
-                  <input value={adding[i]} placeholder={placeholders?.[i]||""} onChange={(e)=>{
-                    const v=[...adding]; v[i]=e.target.value; setAdding(v);
-                  }} className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-xl w-full outline-none"/>
-                </td>
-              ))}
-              <td className="py-2 text-right">
-                <button onClick={()=>{ onAdd(adding); setAdding(Array(columns.length).fill("")); }} className="px-3 py-1.5 rounded-lg border border-white text-black bg-white hover:bg-zinc-200">Tambah</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-function Pengaturan({ db, setDb }) {
-  const s = db.settings || {};
-  return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 max-w-xl">
-      <div className="font-medium mb-4">Pengaturan Toko</div>
-      <Text label="Nama Toko" value={s.namaToko} onChange={(v)=>setDb({...db, settings: {...s, namaToko: v}})} />
-      <Number label="Pajak (%)" value={s.pajakPersen} onChange={(v)=>setDb({...db, settings: {...s, pajakPersen: Number(v||0)}})} min={0} />
-      <Number label="Diskon (%)" value={s.diskonPersen} onChange={(v)=>setDb({...db, settings: {...s, diskonPersen: Number(v||0)}})} min={0} />
-      <div className="text-xs text-zinc-500 mt-3">Semua data disimpan di perangkat ini (LocalStorage). Gunakan Export/Import untuk backup.</div>
-    </div>
-  );
-}
-
-function Footer() {
-  return (
-    <footer className="py-8 text-center text-xs text-zinc-500">
-      © {new Date().getFullYear()} • Dibuat untuk kebutuhan penjualan Parfume • Data lokal (offline-ready)
-    </footer>
-  );
-}
-
-// ===== Small UI Bits =====
-function Row({ l, r }){
-  return (
-    <div className="flex items-center justify-between py-1">
-      <div className="text-zinc-400">{l}</div>
-      <div>{r}</div>
-    </div>
-  );
-}
-
-function Select({ label, value, onChange, options }){
-  return (
-    <div>
-      <div className="text-xs text-zinc-400 mb-1">{label}</div>
-      <select value={value} onChange={(e)=>onChange(e.target.value)} className="w-full px-3 py-2 rounded-xl bg-zinc-800 border border-zinc-700 outline-none">
-        {options.map(o=> <option key={o.value} value={o.value}>{o.label}</option>)}
+    <!-- Form Penjualan -->
+    <div class="card" id="formPenjualan" style="display:none;">
+      <h2>Tambah Penjualan</h2>
+      <label>Bibit Parfum</label>
+      <select id="bibit">
+        <option value="Lavender">Lavender (Rp50.000)</option>
+        <option value="Musk">Musk (Rp70.000)</option>
+        <option value="Rose">Rose (Rp90.000)</option>
       </select>
+
+      <label>Botol</label>
+      <select id="botol">
+        <option value="Kaca">Botol Kaca (Rp20.000)</option>
+        <option value="Plastik">Botol Plastik (Rp10.000)</option>
+      </select>
+
+      <label>Kualitas</label>
+      <select id="kualitas">
+        <option value="Premium">Premium (+Rp30.000)</option>
+        <option value="Standar">Standar (+Rp10.000)</option>
+      </select>
+
+      <label>Jumlah</label>
+      <input type="number" id="jumlah" value="1" min="1">
+
+      <button onclick="tambahPenjualan()">Tambah</button>
     </div>
-  );
-}
 
-function Number({ label, value, onChange, min=0, max=999999 }){
-  return (
-    <div>
-      <div className="text-xs text-zinc-400 mb-1">{label}</div>
-      <input type="number" value={value} min={min} max={max} onChange={(e)=>onChange(e.target.value)} className="w-full px-3 py-2 rounded-xl bg-zinc-800 border border-zinc-700 outline-none"/>
+    <!-- Data Penjualan -->
+    <div class="card" id="dataPenjualan" style="display:none;">
+      <h2>📊 Data Penjualan</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Bibit</th>
+            <th>Botol</th>
+            <th>Kualitas</th>
+            <th>Jumlah</th>
+            <th>Total (Rp)</th>
+          </tr>
+        </thead>
+        <tbody id="tabelPenjualan"></tbody>
+      </table>
+      <h3>Total Semua: Rp<span id="totalSemua">0</span></h3>
     </div>
-  );
-}
+  </div>
 
-function Text({ label, value, onChange, placeholder }){
-  return (
-    <div>
-      {label && <div className="text-xs text-zinc-400 mb-1">{label}</div>}
-      <input value={value||""} placeholder={placeholder} onChange={(e)=>onChange(e.target.value)} className="w-full px-3 py-2 rounded-xl bg-zinc-800 border border-zinc-700 outline-none"/>
-    </div>
-  );
-}
+  <script>
+    // --- LOGIN SISTEM ---
+    function login() {
+      const username = document.getElementById("username").value;
+      if(username) {
+        localStorage.setItem("user", username);
+        loadUser();
+      } else {
+        alert("Masukkan username dulu!");
+      }
+    }
 
-function TextArea({ label, value, onChange, placeholder }){
-  return (
-    <div>
-      {label && <div className="text-xs text-zinc-400 mb-1">{label}</div>}
-      <textarea value={value||""} placeholder={placeholder} onChange={(e)=>onChange(e.target.value)} rows={4} className="w-full px-3 py-2 rounded-xl bg-zinc-800 border border-zinc-700 outline-none"/>
-    </div>
-  );
-}
+    function logout() {
+      localStorage.removeItem("user");
+      location.reload();
+    }
 
-function Login({ onLogin }){
-  const [u, setU] = useState("");
-  const [p, setP] = useState("");
-  const [show, setShow] = useState(false);
-  const [err, setErr] = useState("");
+    function loadUser() {
+      const user = localStorage.getItem("user");
+      if(user) {
+        document.getElementById("loginCard").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+        document.getElementById("formPenjualan").style.display = "block";
+        document.getElementById("dataPenjualan").style.display = "block";
+        document.getElementById("userDisplay").innerText = user;
+        loadPenjualan();
+      }
+    }
 
-  function submit(e){
-    e.preventDefault();
-    if(!u || !p) return setErr("Isi username & password");
-    // Simple demo auth: simpan username saja. Password tidak disimpan.
-    setErr(""); onLogin(u);
-  }
+    // --- PENJUALAN SISTEM ---
+    let hargaBibit = { "Lavender": 50000, "Musk": 70000, "Rose": 90000 };
+    let hargaBotol = { "Kaca": 20000, "Plastik": 10000 };
+    let hargaKualitas = { "Premium": 30000, "Standar": 10000 };
 
-  return (
-    <div className="min-h-screen grid place-items-center bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100">
-      <motion.div initial={{opacity:0, y:12}} animate={{opacity:1, y:0}} className="w-full max-w-sm p-6 rounded-2xl border border-zinc-800 bg-zinc-900 shadow-xl">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-fuchsia-500 to-indigo-500"/>
-          <div>
-            <div className="text-lg font-semibold">Login • April Parfume</div>
-            <div className="text-xs text-zinc-400">Data tersimpan di LocalStorage</div>
-          </div>
-        </div>
-        <form onSubmit={submit} className="space-y-3">
-          <div>
-            <div className="text-xs text-zinc-400 mb-1">Username</div>
-            <input value={u} onChange={(e)=>setU(e.target.value)} className="w-full px-3 py-2 rounded-xl bg-zinc-800 border border-zinc-700 outline-none"/>
-          </div>
-          <div>
-            <div className="text-xs text-zinc-400 mb-1">Password</div>
-            <div className="relative">
-              <input type={show?"text":"password"} value={p} onChange={(e)=>setP(e.target.value)} className="w-full px-3 py-2 rounded-xl bg-zinc-800 border border-zinc-700 outline-none pr-10"/>
-              <button type="button" onClick={()=>setShow(s=>!s)} className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-zinc-400">{show?"Sembunyikan":"Lihat"}</button>
-            </div>
-          </div>
-          {err && <div className="text-red-400 text-xs">{err}</div>}
-          <button type="submit" className="w-full py-3 rounded-xl bg-white text-black font-medium hover:bg-zinc-200">Masuk</button>
-        </form>
-        <div className="text-[11px] text-zinc-500 mt-3">* Demo login sederhana: hanya menyimpan username ke LocalStorage. Untuk keamanan produksi, gunakan backend/auth sesungguhnya.</div>
-      </motion.div>
-    </div>
-  );
-}
+    function tambahPenjualan() {
+      const bibit = document.getElementById("bibit").value;
+      const botol = document.getElementById("botol").value;
+      const kualitas = document.getElementById("kualitas").value;
+      const jumlah = parseInt(document.getElementById("jumlah").value);
+
+      const total = (hargaBibit[bibit] + hargaBotol[botol] + hargaKualitas[kualitas]) * jumlah;
+
+      let data = JSON.parse(localStorage.getItem("penjualan")) || [];
+      data.push({bibit, botol, kualitas, jumlah, total});
+      localStorage.setItem("penjualan", JSON.stringify(data));
+
+      loadPenjualan();
+    }
+
+    function loadPenjualan() {
+      let data = JSON.parse(localStorage.getItem("penjualan")) || [];
+      let tbody = document.getElementById("tabelPenjualan");
+      tbody.innerHTML = "";
+      let totalSemua = 0;
+
+      data.forEach((item) => {
+        let row = `<tr>
+          <td>${item.bibit}</td>
+          <td>${item.botol}</td>
+          <td>${item.kualitas}</td>
+          <td>${item.jumlah}</td>
+          <td>${item.total.toLocaleString()}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+        totalSemua += item.total;
+      });
+
+      document.getElementById("totalSemua").innerText = totalSemua.toLocaleString();
+    }
+
+    loadUser();
+  </script>
+</body>
+</html>
